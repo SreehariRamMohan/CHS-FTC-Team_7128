@@ -112,6 +112,8 @@ public class Autonomous_Red_v1 extends LinearOpMode {
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
+        //code added here
+
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
