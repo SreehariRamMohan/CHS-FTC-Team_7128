@@ -138,7 +138,7 @@ public class VuforiaTest extends LinearOpMode {
          * documentation directory.
          */
         VuforiaTrackables visionTargets = this.vuforia.loadTrackablesFromAsset("FTC_2016-17");
-        VuforiaTrackable target = visionTargets.get(3);
+        VuforiaTrackable target = visionTargets.get(1);
         target.setName("Target");  // Stones
 
         /** For convenience, gather together all the trackable objects in one easily-iterable collection */
