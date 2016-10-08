@@ -118,9 +118,12 @@ public class Autonomous_Red_v1 extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 48 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED,  -60,  -60, 5.0);  // S1: Forward 48 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   -12, 12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        //the above line should make it turn left forward one foot, but we need test to see what it actually does
+        encoderDrive(DRIVE_SPEED, -60, -60, 5.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        //beacon press
+        encoderDrive(DRIVE_SPEED, 60, 60, 5.0); // Move forward 60 inches to come back to center.
 
         robot.leftClaw.setPosition(1.0);            // S4: Stop and close the claw.
         robot.rightClaw.setPosition(0.0);
