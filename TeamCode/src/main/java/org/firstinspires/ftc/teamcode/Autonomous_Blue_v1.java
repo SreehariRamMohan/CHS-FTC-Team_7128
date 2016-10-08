@@ -116,9 +116,12 @@ public class Autonomous_Blue_v1 extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED,  48,  48, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED,  -60,  -60, 5.0);  // S1: Backward 60 Inches with 5 Sec timeout
+        //should turn right about one foot, but it needs to be tested to see for sure
         encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        encoderDrive(DRIVE_SPEED, -24, -24, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+        encoderDrive(DRIVE_SPEED, -48, -48, 5.0);  // S3: Reverse 24 Inches with 5 Sec timeout
+        //beacon press
+        encoderDrive(DRIVE_SPEED, 60, 60, 5.0); // forward 60 inches with 5 sec timeout
 
         // Put the code here
         //robot.leftClaw.setPosition(1.0);            // S4: Stop and close the claw.
