@@ -3,10 +3,10 @@
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/blue_beacon.JPG" />
+        android:src="@drawable/blue_beacon" />
 
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:src="@drawable/red_beacon.JPG" />
+        android:src="@drawable/red_beacon" />
 </selector>

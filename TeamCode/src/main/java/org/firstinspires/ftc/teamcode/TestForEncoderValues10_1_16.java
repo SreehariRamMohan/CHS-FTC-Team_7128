@@ -67,7 +67,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Autonomous Blue v1", group="Autonomous")
+@Autonomous(name="Autonomous Encoder v1", group="Autonomous")
 //@Disabled
 public class TestForEncoderValues10_1_16 extends LinearOpMode {
 
