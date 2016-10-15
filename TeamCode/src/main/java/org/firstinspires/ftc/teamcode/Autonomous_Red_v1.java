@@ -33,10 +33,18 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.LED;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
@@ -123,6 +131,7 @@ public class Autonomous_Red_v1 extends LinearOpMode {
         //the above line should make it turn left forward one foot, but we need test to see what it actually does
         encoderDrive(DRIVE_SPEED, -48, -48, 5.0);  // S3: Reverse 24 Inches with 4 Sec timeout
         //beacon press
+        beaconPress();
         encoderDrive(DRIVE_SPEED, 60, 60, 5.0); // Move forward 60 inches to come back to center.
 
         robot.leftClaw.setPosition(1.0);            // S4: Stop and close the claw.
@@ -131,6 +140,62 @@ public class Autonomous_Red_v1 extends LinearOpMode {
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
+    }
+
+    private void beaconPress() {
+
+        boolean activateServo = true;
+        double servoPosition;
+        Servo servo1 = hardwareMap.servo.get("servo_1");
+        ColorSensor cr = hardwareMap.colorSensor.get("mr");
+        final double MAX_POSITION = 1;
+        final double MIN_POSITION = 0;
+        double currentTime;
+        LED led;
+        TouchSensor t;
+        /*
+        servo1 = hardwareMap.servo.get("servo_1");
+        cr = hardwareMap.colorSensor.get("mr");
+        */
+        if (activateServo) {
+            servoPosition = servo1.getPosition();
+            servo1.setPosition(servoPosition);
+        }
+
+        led = hardwareMap.led.get("led");
+        t = hardwareMap.touchSensor.get("t");
+
+        //waitForStart();
+
+        float hsvValues[] = {0, 0, 0};
+        final float values[] = hsvValues;
+        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(com.qualcomm.ftcrobotcontroller.R.id.RelativeLayout);
+
+        cr.enableLed(t.isPressed());
+
+        Color.RGBToHSV(cr.red() * 8, cr.green() * 8, cr.blue() * 8, hsvValues);
+
+        double redV = cr.red();
+        double blueV = cr.blue();
+
+        telemetry.addData("Clear", cr.alpha());
+        telemetry.addData("Red  ", cr.red());
+        telemetry.addData("Green", cr.green());
+        telemetry.addData("Blue ", cr.blue());
+        telemetry.addData("Hue", hsvValues[0]);
+
+        if (blueV - redV >= 50) {
+            //if blue is our team color
+            //press the button , move closer
+            telemetry.addData("This is blue!", cr.blue());
+        } else {
+            currentTime = this.time;
+            while (this.time - currentTime < 1) {
+                servo1.setPosition(0);
+            }
+            //press the button, move closer
+            telemetry.addData("This is red!", cr.red());
+        }
     }
 
     /*
