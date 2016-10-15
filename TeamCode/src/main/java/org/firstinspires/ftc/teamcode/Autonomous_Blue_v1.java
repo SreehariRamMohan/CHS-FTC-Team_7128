@@ -34,10 +34,19 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.LED;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
@@ -114,12 +123,19 @@ public class Autonomous_Blue_v1 extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
+        /**
+         * Following is where the actual driving code for
+         * the Autonomous goes
+         */
+
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         encoderDrive(DRIVE_SPEED,  -60,  -60, 5.0);  // S1: Backward 60 Inches with 5 Sec timeout
         //should turn right about one foot, but it needs to be tested to see for sure
         encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
         encoderDrive(DRIVE_SPEED, -48, -48, 5.0);  // S3: Reverse 24 Inches with 5 Sec timeout
+
+        beaconPress();
         //beacon press
         encoderDrive(DRIVE_SPEED, 60, 60, 5.0); // forward 60 inches with 5 sec timeout
 
@@ -131,6 +147,63 @@ public class Autonomous_Blue_v1 extends LinearOpMode {
         telemetry.addData("Path", "Complete");
         telemetry.update();
     }
+
+    private void beaconPress() {
+
+        boolean activateServo = true;
+        double servoPosition;
+        Servo servo1 = hardwareMap.servo.get("servo_1");
+        ColorSensor cr = hardwareMap.colorSensor.get("mr");
+        final double MAX_POSITION = 1;
+        final double MIN_POSITION = 0;
+        double currentTime;
+        LED led;
+        TouchSensor t;
+        /*
+        servo1 = hardwareMap.servo.get("servo_1");
+        cr = hardwareMap.colorSensor.get("mr");
+        */
+        if (activateServo) {
+            servoPosition = servo1.getPosition();
+            servo1.setPosition(servoPosition);
+        }
+
+        led = hardwareMap.led.get("led");
+        t = hardwareMap.touchSensor.get("t");
+
+        //waitForStart();
+
+        float hsvValues[] = {0, 0, 0};
+        final float values[] = hsvValues;
+        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(com.qualcomm.ftcrobotcontroller.R.id.RelativeLayout);
+
+        cr.enableLed(t.isPressed());
+
+        Color.RGBToHSV(cr.red() * 8, cr.green() * 8, cr.blue() * 8, hsvValues);
+
+        double redV = cr.red();
+        double blueV = cr.blue();
+
+        telemetry.addData("Clear", cr.alpha());
+        telemetry.addData("Red  ", cr.red());
+        telemetry.addData("Green", cr.green());
+        telemetry.addData("Blue ", cr.blue());
+        telemetry.addData("Hue", hsvValues[0]);
+
+        if (blueV - redV >= 50) {
+            //if blue is our team color
+            //press the button , move closer
+            telemetry.addData("This is blue!", cr.blue());
+        } else {
+            currentTime = this.time;
+            while (this.time - currentTime < 1) {
+                servo1.setPosition(0);
+            }
+            //press the button, move closer
+            telemetry.addData("This is red!", cr.red());
+        }
+    }
+
 
     /*
      *  Method to perfmorm a relative move, based on encoder counts.

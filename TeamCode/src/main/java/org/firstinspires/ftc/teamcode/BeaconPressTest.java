@@ -27,24 +27,23 @@ import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-public class BeaconPressTest extends OpMode{
+public class BeaconPressTest extends LinearOpMode{
 
     boolean activateServo = true;
     double servoPosition;
-    Servo servo1;
-    ColorSensor cr;
+    Servo servo1 = hardwareMap.servo.get("servo_1");
+    ColorSensor cr = hardwareMap.colorSensor.get("mr");
     public static final double MAX_POSITION = 1;
     public static final double MIN_POSITION = 0;
     double currentTime;
     LED led;
     TouchSensor t;
+    /*
+    servo1 = hardwareMap.servo.get("servo_1");
+    cr = hardwareMap.colorSensor.get("mr");
+    */
 
-    public void init(){
-        servo1 = hardwareMap.servo.get("servo_1");
-        cr = hardwareMap.colorSensor.get("mr");
-    }
-
-    public void loop() {
+    public void runOpMode() {
 
         if (activateServo) {
             servoPosition = servo1.getPosition();
