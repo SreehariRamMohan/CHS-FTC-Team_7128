@@ -375,7 +375,7 @@ public class Autonomous_Red_Vuforia_v1 extends LinearOpMode {
                     }
                 }
                 else {
-
+                    // Keep turning left to look for beacon
                 }
 
                 OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
