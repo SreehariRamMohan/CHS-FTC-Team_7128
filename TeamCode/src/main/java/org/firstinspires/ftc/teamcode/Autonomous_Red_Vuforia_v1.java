@@ -344,13 +344,45 @@ public class Autonomous_Red_Vuforia_v1 extends LinearOpMode {
         /** Start tracking the data sets we care about. */
         visionTargets.activate();
 
-        encoderDrive(DRIVE_SPEED,  -60,  -60, 5.0);  // S1: Forward 48 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   -12, 12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        autonomousShoot();
+
+        encoderDrive(DRIVE_SPEED,  60,  60, 5.0);  // S1: Forward 48 Inches with 5 Sec timeout
+        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
         //the above line should make it turn left forward one foot, but we need test to see what it actually does
         encoderDrive(DRIVE_SPEED, -24, -24, 5.0);  // S3: Reverse 24 Inches with 4 Sec timeout
 
         vuforiaDetect(); // Detects image for alignment;
     }
+
+    /**
+     * Shoot preloaded balls
+     */
+
+    private void autonomousShoot() {
+        final double STOP_POSITION  = 0.5;
+        double currTime = this.time;
+
+        while (this.time - currTime < 1.5) {
+            // wait
+        }
+
+        servo2.setPosition(0.2);
+        //something needs to be added to the robot to stop the servo from moving the entire 180 degrees
+
+        servo2.setPosition(STOP_POSITION);
+
+        currTime = this.time;
+
+        while(this.time - currTime < 3) {
+            motor1.setPower(0.5);
+        }
+
+        motor1.setPower(0);
+    }
+
+    /**
+     * Detect Vuforia trackables
+     */
 
     private void vuforiaDetect() {
 
@@ -375,7 +407,11 @@ public class Autonomous_Red_Vuforia_v1 extends LinearOpMode {
                     }
                 }
                 else {
-                    // Keep turning left to look for beacon
+                    /*
+                    Turns the robot left
+                     */
+                    rightMotor.setPower(0.5);
+                    leftMotor.setPower(-0.5);
                 }
 
                 OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
