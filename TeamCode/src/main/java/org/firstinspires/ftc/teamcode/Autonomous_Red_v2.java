@@ -96,9 +96,9 @@ import java.util.List;
  * is explained below.
  */
 
-@Autonomous(name="Autonomous_Red v1", group = "Autonomous")
+@Autonomous(name="Autonomous_Red v2", group ="Autonomous")
 //@Disabled
-public class Autonomous_Red_Vuforia_v1 extends LinearOpMode {
+public class Autonomous_Red_v2 extends LinearOpMode {
 
     public static final String TAG = "Vuforia Sample";
 
@@ -340,6 +340,9 @@ public class Autonomous_Red_Vuforia_v1 extends LinearOpMode {
 
 
         waitForStart();
+        time = this.time;
+        while(this.time - time <= 5) {}
+
 
         /** Start tracking the data sets we care about. */
         visionTargets.activate();
@@ -347,7 +350,7 @@ public class Autonomous_Red_Vuforia_v1 extends LinearOpMode {
         autonomousShoot();
 
         encoderDrive(DRIVE_SPEED,  60,  60, 5.0);  // S1: Forward 48 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED,   12, -12, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        encoderDrive(TURN_SPEED,   -12, 12, 4.0);  // S2: Turn Left 12 Inches with 4 Sec timeout
         //the above line should make it turn left forward one foot, but we need test to see what it actually does
         encoderDrive(DRIVE_SPEED, -24, -24, 5.0);  // S3: Reverse 24 Inches with 4 Sec timeout
 
