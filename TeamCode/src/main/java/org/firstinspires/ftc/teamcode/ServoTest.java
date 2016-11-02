@@ -12,6 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class ServoTest extends OpMode{
 
     Servo servo;
+    boolean activateServo = true;
+    double servoPos;
 
     @Override
     public void init() {
@@ -24,6 +26,12 @@ public class ServoTest extends OpMode{
      Minimum is 0, Maximum is 1
      */
     public void loop() {
+
+
+        if (activateServo) {
+            servoPos = servo.getPosition();
+            servo.setPosition(servoPos);
+        }
 
         if(gamepad1.dpad_right){
             servo.setPosition(0.2);
