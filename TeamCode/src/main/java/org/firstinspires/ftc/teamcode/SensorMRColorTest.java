@@ -119,6 +119,13 @@ public class SensorMRColorTest extends LinearOpMode {
             telemetry.addData("Blue ", colorSensor.blue());
             telemetry.addData("Hue", hsvValues[0]);
 
+            if (colorSensor.red() - colorSensor.blue() > 0.5) {
+                telemetry.addData("This is", "Red!");
+            }
+            else if (colorSensor.blue() - colorSensor.red() > 0.5) {
+                telemetry.addData("This is", "Blue!");
+            }
+
             // change the background color to match the color detected by the RGB sensor.
             // pass a reference to the hue, saturation, and value array as an argument
             // to the HSVToColor method.
