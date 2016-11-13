@@ -27,68 +27,75 @@ import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-public class BeaconPressTest extends LinearOpMode{
+@Autonomous(name= "Beacon Press Test", group = "Autonomous")
+public class BeaconPressTest extends LinearOpMode {
 
-    boolean activateServo = true;
-    double servoPosition;
-    Servo servo1 = hardwareMap.servo.get("servo_1");
-    ColorSensor cr = hardwareMap.colorSensor.get("mr");
-    public static final double MAX_POSITION = 1;
-    public static final double MIN_POSITION = 0;
-    double currentTime;
-    LED led;
-    TouchSensor t;
+    Servo servo1;
+    ColorSensor cr;
     /*
     servo1 = hardwareMap.servo.get("servo_1");
     cr = hardwareMap.colorSensor.get("mr");
     */
+    @Override
+    public void runOpMode()  throws InterruptedException, NullPointerException {
 
-    public void runOpMode() {
+        servo1 = hardwareMap.servo.get("servo_1");
+        cr = hardwareMap.colorSensor.get("mr");
 
-        if (activateServo) {
-            servoPosition = servo1.getPosition();
-            servo1.setPosition(servoPosition);
-        }
+        servo1.setPosition(0.5);
 
-        led = hardwareMap.led.get("led");
-        t = hardwareMap.touchSensor.get("t");
+        waitForStart();
 
-        //waitForStart();
+        //final float values[] = hsvValues;
+        //final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(com.qualcomm.ftcrobotcontroller.R.id.RelativeLayout);
 
-        float hsvValues[] = {0, 0, 0};
-        final float values[] = hsvValues;
-        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(com.qualcomm.ftcrobotcontroller.R.id.RelativeLayout);
+        cr.enableLed(false);
 
-        enableLed(t.isPressed());
+        //Color.RGBToHSV(cr.red() * 8, cr.green() * 8, cr.blue() * 8, hsvValues);
+        while(opModeIsActive()) {
+            double redV = cr.red();
+            double blueV = cr.blue();
 
-        Color.RGBToHSV(cr.red() * 8, cr.green() * 8, cr.blue() * 8, hsvValues);
+            telemetry.addData("Red  ", cr.red());
+            telemetry.addData("Green", cr.green());
+            telemetry.addData("Blue ", cr.blue());
 
-        double redV = cr.red();
-        double blueV = cr.blue();
 
-        telemetry.addData("Clear", cr.alpha());
-        telemetry.addData("Red  ", cr.red());
-        telemetry.addData("Green", cr.green());
-        telemetry.addData("Blue ", cr.blue());
-        telemetry.addData("Hue", hsvValues[0]);
-
-        if (blueV - redV >= 50) {
-            //if blue is our team color
-            //press the button , move closer
-            telemetry.addData("This is blue!", cr.blue());
-        } else {
-            currentTime = this.time;
-            while (this.time - currentTime < 1) {
-                servo1.setPosition(0);
+            if (blueV - redV > 0.5) {
+                //if blue is our team color
+                //press the button , move closer
+                servo1.setPosition(0.2);
+                telemetry.addData("This is blue!", cr.blue());
+            } else if (redV - blueV > 0.5) {
+                servo1.setPosition(0.7);
+                //press the button, move closer
+                telemetry.addData("This is red!", cr.red());
             }
-            //press the button, move closer
-            telemetry.addData("This is red!", cr.red());
+            else {
+                servo1.setPosition(0.5);
+            }
+            /* // sree prototype possible fix for spazzing out
+            if(cr.blue() > 0 && cr.red() == 0) {
+                servo1.setPosition(0.2);
+                //drive forward to push the button;
+                telemetry.addData("BLUE", cr.blue());
+                servo1.setPosition(0.5);
+                telemetry.addData("Blue", cr.blue());
+            } else if(cr.red() > 0 && cr.blue() == 0) {
+                servo1.setPosition(0.7);
+                // drive forward and push the beacon;
+                telemetry.addData("RED", cr.red());
+                servo1.setPosition(0.5);
+                telemetry.addData("Red", cr.red());
+            } */
+
+            telemetry.update();
+
+            idle();
         }
+
     }
 
-    private void enableLed(boolean value) {
-        cr.enableLed(value);
-    }
 
 }
 

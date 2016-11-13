@@ -27,17 +27,16 @@ public class ServoTest extends OpMode{
      */
     public void loop() {
 
-
-        if (activateServo) {
-            servoPos = servo.getPosition();
-            servo.setPosition(servoPos);
+        if (gamepad1.y) {
+            if(gamepad1.dpad_up){
+                servo.setPosition(0.00001);
+            } else if(gamepad1.dpad_down){
+                servo.setPosition(1);
+            } else {
+                servo.setPosition(0.5);
+            }
         }
-
-        if(gamepad1.dpad_right){
-            servo.setPosition(0.2);
-        } else if(gamepad1.dpad_left){
-            servo.setPosition(0.7);
-        } else {
+        else {
             servo.setPosition(0.5);
         }
 
