@@ -446,37 +446,17 @@ public class Autonomous_Red_v2 extends LinearOpMode {
 
     private void beaconPress() {
 
-        boolean activateServo = true;
-        double servoPosition;
-        final double MAX_POSITION = 1;
-        final double MIN_POSITION = 0;
-        double currentTime;
-        LED led;
-        TouchSensor t;
-        /*
-        servo1 = hardwareMap.servo.get("servo_1");
-        cr = hardwareMap.colorSensor.get("mr");
-        */
-        if (activateServo) {
-            servoPosition = servo1.getPosition();
-            servo1.setPosition(servoPosition);
-        }
+        float hsvValues[] = {0F, 0F, 0F};
 
-        led = hardwareMap.led.get("led");
-        t = hardwareMap.touchSensor.get("t");
-
-        //waitForStart();
-
-        float hsvValues[] = {0, 0, 0};
+        // values is a reference to the hsvValues array.
         final float values[] = hsvValues;
-        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(com.qualcomm.ftcrobotcontroller.R.id.RelativeLayout);
 
-        cr.enableLed(t.isPressed());
+        cr.enableLed(false);
 
-        Color.RGBToHSV(cr.red() * 8, cr.green() * 8, cr.blue() * 8, hsvValues);
+        double currTime = this.time;
+        while (this.time - currTime < 1) {
 
-        double redV = cr.red();
-        double blueV = cr.blue();
+        }
 
         telemetry.addData("Clear", cr.alpha());
         telemetry.addData("Red  ", cr.red());
@@ -484,18 +464,15 @@ public class Autonomous_Red_v2 extends LinearOpMode {
         telemetry.addData("Blue ", cr.blue());
         telemetry.addData("Hue", hsvValues[0]);
 
-        if (blueV - redV >= 50) {
-            //if blue is our team color
-            //press the button , move closer
-            telemetry.addData("This is blue!", cr.blue());
-        } else {
-            currentTime = this.time;
-            while (this.time - currentTime < 1) {
-                servo1.setPosition(0);
-            }
-            //press the button, move closer
-            telemetry.addData("This is red!", cr.red());
+        if (cr.red() - cr.blue() > 0.5) {
+            telemetry.addData("This is", "Red!");
         }
+        else if (cr.blue() - cr.red() > 0.5) {
+            telemetry.addData("This is", "Blue!");
+        }
+
+        telemetry.update();
+
     }
 
     public void encoderDrive(double speed,
