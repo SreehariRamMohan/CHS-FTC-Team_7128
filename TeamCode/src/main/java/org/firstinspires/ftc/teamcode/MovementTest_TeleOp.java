@@ -20,14 +20,19 @@ public class MovementTest_TeleOp extends OpMode{
 
     public void loop(){
         if(gamepad1.dpad_up){
-            rightMotor.setPower(0.5);
-            leftMotor.setPower(0.5);
+            rightMotor.setPower(-1);
+            leftMotor.setPower(1);
+            telemetry.addData("Right Motor Front", rightMotor.getPower());
+            telemetry.addData("Left Motor Front", leftMotor.getPower());
         } else if(gamepad1.dpad_down){
-            rightMotor.setPower(-0.5);
-            leftMotor.setPower(-0.5);
+            rightMotor.setPower(1);
+            leftMotor.setPower(-1);
+            telemetry.addData("Right Motor Back", rightMotor.getPower());
+            telemetry.addData("Left Motor Back", leftMotor.getPower());
         } else {
             rightMotor.setPower(0);
             leftMotor.setPower(0);
         }
+        telemetry.update();
     }
 }
