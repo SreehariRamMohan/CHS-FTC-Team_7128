@@ -7,14 +7,16 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * Created by ShruthiJaganathan on 10/19/16.
  */
+
+
 public class TeleOp_v1  extends OpMode{
     Servo servo1; // Beacon Press servo
     Servo servo2; // Ball Shooter servo
+    Servo sweeper; // Sweeper motor
 
     DcMotor motor1; // Ball Shooter motor
     DcMotor rightMotor; // Right side wheels
     DcMotor leftMotor; // Left Side Wheels
-    DcMotor sweeper; // Sweeper motor
 
     @Override
     public void init() {
@@ -23,35 +25,35 @@ public class TeleOp_v1  extends OpMode{
         motor1 = hardwareMap.dcMotor.get("motor_1");
         rightMotor = hardwareMap.dcMotor.get("right_m");
         leftMotor = hardwareMap.dcMotor.get("left_m");
-        sweeper = hardwareMap.dcMotor.get("sweeper_m");
+        sweeper = hardwareMap.servo.get("sweeper_m");
     }
 
     @Override
     public void loop() {
         // Gamepad 1
 
-        if(gamepad1.right_stick_y == 1) {
-          rightMotor.setPower(1); //moves right wheels forward
-        } else if(gamepad1.right_stick_y == -1) {
-            rightMotor.setPower(-1); //moves right wheels backward
+        if(gamepad1.right_stick_y == -1) {
+          rightMotor.setPower(-1); //moves right wheels forward
+        } else if(gamepad1.right_stick_y == 1) {
+            rightMotor.setPower(1); //moves right wheels backward
         } else {
             rightMotor.setPower(0); //stops right wheels
         }
 
-        if(gamepad1.left_stick_y == 1){
+        if(gamepad1.left_stick_y == -1){
             leftMotor.setPower(1); //moves left wheels forward
-        } else if(gamepad2.left_stick_y == -1){
+        } else if(gamepad2.left_stick_y == 1){
             leftMotor.setPower(-1); //moves left wheels backward
         } else {
             leftMotor.setPower(0); //stops left wheels
         }
 
         if(gamepad1.y){
-            sweeper.setPower(1); //surgical tubing forward
+            sweeper.setPosition(1); //surgical tubing forward
         } else if(gamepad1.a){
-            sweeper.setPower(-1); //surgical tubing backward
+            sweeper.setPosition(-1); //surgical tubing backward
         } else if(gamepad1.x){
-            sweeper.setPower(0); //stop surgical tubing
+            sweeper.setPosition(0); //stop surgical tubing
         }
 
         //gamepad 2
