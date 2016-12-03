@@ -21,7 +21,7 @@ public class NewMovementTestAuto extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
+    static final double     DRIVE_GEAR_REDUCTION    = 0.75;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
@@ -85,7 +85,24 @@ public class NewMovementTestAuto extends LinearOpMode {
 
         waitForStart();
 
-        encoderDrive(NORMAL_DRIVE_SPEED, NORMAL_DRIVE_SPEED, 12, -12, 5);
-        encoderDrive(NORMAL_DRIVE_SPEED, NORMAL_DRIVE_SPEED, -12, 12, 5);
+
+        for (int i = 0; i < 3; i++) {
+            encoderDrive(NORMAL_DRIVE_SPEED, NORMAL_DRIVE_SPEED, 24, -24, 30);
+            wait(1);
+        }
+
+        for (int i = 0; i < 3; i++) {
+            encoderDrive(NORMAL_DRIVE_SPEED, NORMAL_DRIVE_SPEED, -24, 24, 30);
+            wait(1);
+        }
+
+        stop();
+    }
+
+    public void wait(int time) {
+        double currTime = this.time;
+        while (this.time - currTime < time) {
+
+        }
     }
 }
