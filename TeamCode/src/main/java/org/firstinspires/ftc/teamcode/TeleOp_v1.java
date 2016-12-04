@@ -17,6 +17,7 @@ public class TeleOp_v1  extends OpMode{
     DcMotor motor1; // Ball Shooter motor
     DcMotor rightMotor; // Right side wheels
     DcMotor leftMotor; // Left Side Wheels
+    double currTime; // timer
 
     @Override
     public void init() {
@@ -26,11 +27,13 @@ public class TeleOp_v1  extends OpMode{
         rightMotor = hardwareMap.dcMotor.get("right_m");
         leftMotor = hardwareMap.dcMotor.get("left_m");
         sweeper = hardwareMap.servo.get("sweeper_m");
+        currTime = this.time;
     }
 
     @Override
     public void loop() {
         // Gamepad 1
+        currTime = this.time;
 
         if(gamepad1.right_stick_y == -1) {
           rightMotor.setPower(-1); //moves right wheels forward
@@ -49,12 +52,21 @@ public class TeleOp_v1  extends OpMode{
         }
 
         if(gamepad1.y){
-            sweeper.setPosition(1); //surgical tubing forward
+            while(this.time - currTime < 10) {
+                sweeper.setPosition(1); //surgical tubing forward
+            }
         } else if(gamepad1.a){
+            while(this.time - currTime < 10) {
+                sweeper.setPosition(-1); //surgical tubing backward
+            }
+        }
+
+        /*else if(gamepad1.a){
             sweeper.setPosition(-1); //surgical tubing backward
         } else if(gamepad1.x){
             sweeper.setPosition(0); //stop surgical tubing
         }
+        */
 
         //gamepad 2
 

@@ -21,11 +21,13 @@ public class SweeperTest extends OpMode {
     @Override
     public void loop() {
         if(gamepad1.y){
-            sweeper.setPosition(1); //surgical tubing forward
+            sweeper.setPosition(1); //surgical tubing forward, counterclockwise
         } else if(gamepad1.a){
             sweeper.setPosition(0); //surgical tubing backward
         } else if(gamepad1.x){
-            sweeper.setPosition(0.5); //stop surgical tubing
+            sweeper.setPosition(5); //stop surgical tubing
+        } else if(gamepad1.b){
+            sweeper.setPosition(0.51); //stop surgical tubing
         }
     }
 }
