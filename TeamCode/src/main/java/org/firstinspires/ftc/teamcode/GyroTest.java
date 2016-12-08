@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.util.Range;
 
@@ -45,8 +46,9 @@ public class GyroTest extends LinearOpMode {
 
         gyro.resetZAxisIntegrator();
 
-
-        gyroDrive(0.5, 60, 0);
+        rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        gyroDrive(1, 60, 0);
+        gyroTurn(0.1, 90);
 
     }
 
@@ -54,20 +56,20 @@ public class GyroTest extends LinearOpMode {
                             double distance,
                             double angle) throws InterruptedException {
 
-        int newLeftTarget;
-        int newRightTarget;
-        int moveCounts;
-        double max;
-        double error;
-        double steer;
-        double leftSpeed;
-        double rightSpeed;
+        int     newLeftTarget;
+        int     newRightTarget;
+        int     moveCounts;
+        double  max;
+        double  error;
+        double  steer;
+        double  leftSpeed;
+        double  rightSpeed;
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
-            moveCounts = (int) (distance * COUNTS_PER_INCH);
+            moveCounts = (int)(distance * COUNTS_PER_INCH);
             newLeftTarget = leftMotor.getCurrentPosition() + moveCounts;
             newRightTarget = rightMotor.getCurrentPosition() + moveCounts;
 
@@ -81,7 +83,7 @@ public class GyroTest extends LinearOpMode {
             // start motion.
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
             leftMotor.setPower(speed);
-            rightMotor.setPower(-speed);
+            rightMotor.setPower(speed);
 
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
@@ -100,20 +102,21 @@ public class GyroTest extends LinearOpMode {
 
                 // Normalize speeds if any one exceeds +/- 1.0;
                 max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
-                if (max > 1.0) {
+                if (max > 1.0)
+                {
                     leftSpeed /= max;
                     rightSpeed /= max;
                 }
 
                 leftMotor.setPower(leftSpeed);
-                rightMotor.setPower(-rightSpeed);
+                rightMotor.setPower(rightSpeed);
 
                 // Display drive status for the driver.
-                telemetry.addData("Err/St", "%5.1f/%5.1f", error, steer);
-                telemetry.addData("Target", "%7d:%7d", newLeftTarget, newRightTarget);
-                telemetry.addData("Actual", "%7d:%7d", leftMotor.getCurrentPosition(),
+                telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, steer);
+                telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
+                telemetry.addData("Actual",  "%7d:%7d",      leftMotor.getCurrentPosition(),
                         rightMotor.getCurrentPosition());
-                telemetry.addData("Speed", "%5.2f:%5.2f", leftSpeed, -rightSpeed);
+                telemetry.addData("Speed",   "%5.2f:%5.2f",  leftSpeed, rightSpeed);
                 telemetry.update();
 
                 // Allow time for other processes to run.
@@ -149,6 +152,51 @@ public class GyroTest extends LinearOpMode {
      */
     public double getSteer(double error, double PCoeff) {
         return Range.clip(error * PCoeff, -1, 1);
+    }
+
+    public void gyroTurn (  double speed, double angle)
+            throws InterruptedException {
+
+        // keep looping while we are still active, and not on heading.
+        while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
+            // Update telemetry & Allow time for other processes to run.
+            telemetry.update();
+            idle();
+        }
+    }
+
+    boolean onHeading(double speed, double angle, double PCoeff) {
+        double   error ;
+        double   steer ;
+        boolean  onTarget = false ;
+        double leftSpeed;
+        double rightSpeed;
+
+        // determine turn power based on +/- error
+        error = getError(angle);
+
+        if (Math.abs(error) <= HEADING_THRESHOLD) {
+            steer = 0.0;
+            leftSpeed  = 0.0;
+            rightSpeed = 0.0;
+            onTarget = true;
+        }
+        else {
+            steer = getSteer(error, PCoeff);
+            rightSpeed  = speed * steer;
+            leftSpeed   = -rightSpeed;
+        }
+
+        // Send desired speeds to motors.
+        leftMotor.setPower(leftSpeed);
+        rightMotor.setPower(rightSpeed);
+
+        // Display it for the driver.
+        telemetry.addData("Target", "%5.2f", angle);
+        telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
+        telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+
+        return onTarget;
     }
 
 }
