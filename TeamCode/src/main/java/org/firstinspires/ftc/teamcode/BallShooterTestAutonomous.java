@@ -12,7 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class BallShooterTestAutonomous extends LinearOpMode{
     Servo servo2 = hardwareMap.servo.get("servo_2");
-    DcMotor motor1 = hardwareMap.dcMotor.get("motor_1");
+    DcMotor shooterLeft = hardwareMap.dcMotor.get("shoot_left");
+    DcMotor shooterRight = hardwareMap.dcMotor.get("shoot_right");
     final double STOP_POSITION  = 0.5;
     double currTime = this.time;
 
@@ -25,21 +26,22 @@ public class BallShooterTestAutonomous extends LinearOpMode{
         }
 
         servo2.setPosition(0.2);
-        //something needs to be added to the robot to stop the servo from moving the entire 180 degrees
 
         servo2.setPosition(STOP_POSITION);
 
         currTime = this.time;
 
         while(this.time - currTime < 3) {
-            motor1.setPower(0.5);
+            shooterLeft.setPower(0.5);
+            shooterRight.setPower(-0.5);
         }
 
-        motor1.setPower(0);
+        stopRobot();
     }
 
     public void stopRobot(){
-        motor1.setPower(0);
+        shooterLeft.setPower(0);
+        shooterRight.setPower(0);
         servo2.setPosition(0.5);
     }
 }
