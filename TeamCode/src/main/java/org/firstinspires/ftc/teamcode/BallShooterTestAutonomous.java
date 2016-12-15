@@ -42,6 +42,6 @@ public class BallShooterTestAutonomous extends LinearOpMode{
     public void stopRobot(){
         shooterLeft.setPower(0);
         shooterRight.setPower(0);
-        servo2.setPosition(0.5);
+        servo2.setPosition(STOP_POSITION);
     }
 }
