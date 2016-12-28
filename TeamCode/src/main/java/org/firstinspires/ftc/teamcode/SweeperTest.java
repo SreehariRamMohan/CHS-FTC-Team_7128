@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
@@ -11,23 +12,21 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name= "Sweeper Servo Test", group = "TeleOp")
 public class SweeperTest extends OpMode {
-    Servo sweeper; // Sweeper motor
+    DcMotor sweeper; // Sweeper motor
 
     @Override
     public void init() {
-        sweeper = hardwareMap.servo.get("sweeper_m");
+        sweeper = hardwareMap.dcMotor.get("sweeper_m");
     }
 
     @Override
     public void loop() {
         if(gamepad1.y){
-            sweeper.setPosition(1); //surgical tubing forward, counterclockwise
+            sweeper.setPower(1); //surgical tubing forward, counterclockwise
         } else if(gamepad1.a){
-            sweeper.setPosition(0); //surgical tubing backward
+            sweeper.setPower(-1); //surgical tubing backward
         } else if(gamepad1.x){
-            sweeper.setPosition(5); //stop surgical tubing
-        } else if(gamepad1.b){
-            sweeper.setPosition(0.51); //stop surgical tubing
+            sweeper.setPower(0); //stop surgical tubing
         }
     }
 }

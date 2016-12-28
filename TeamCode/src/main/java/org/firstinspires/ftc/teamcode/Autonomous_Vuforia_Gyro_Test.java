@@ -1,11 +1,20 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.app.Activity;
+import android.graphics.Color;
+import android.view.View;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.MatrixF;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
@@ -25,8 +34,11 @@ import java.util.List;
  * Created by Tejas Narayanan on 12/7/16.
  */
 
-@Autonomous(name= "Vuforia Gyro Test", group = "Autonomous")
+@Autonomous(name= "Vuforia Gyro Autonomous", group = "Autonomous")
 public class Autonomous_Vuforia_Gyro_Test extends LinearOpMode {
+
+    HardwarePushbot robot   = new HardwarePushbot();   // Use a Pushbot's hardware
+    private ElapsedTime runtime = new ElapsedTime();
 
     static final double HEADING_THRESHOLD = 1;      // As tight as we can make it with an integer gyro
     static final double P_TURN_COEFF = 0.1;     // Larger is more responsive, but also less stable
@@ -39,6 +51,8 @@ public class Autonomous_Vuforia_Gyro_Test extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * 3.1415);
 
     public static final String TAG = "Vuforia Sample";
+    final double STOP_POSITION  = 0.5;
+
 
     OpenGLMatrix lastLocation = null;
     List<VuforiaTrackable> allTrackables;
@@ -50,11 +64,25 @@ public class Autonomous_Vuforia_Gyro_Test extends LinearOpMode {
     VuforiaLocalizer vuforia;
 
     ModernRoboticsI2cGyro gyro;
+    ColorSensor colorSensor;
     DcMotor leftMotor;
     DcMotor rightMotor;
+    Servo ballFlipperUpper;
+    Servo beaconPressServoTurnyThingThatChangesWhenYouDetectColors;
+    DcMotor shooterLeft;
+    DcMotor shooterRight;
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
+        colorSensor = hardwareMap.colorSensor.get("cr");
+        leftMotor = hardwareMap.dcMotor.get("left_m");
+        rightMotor = hardwareMap.dcMotor.get("right_m");
+        ballFlipperUpper = hardwareMap.servo.get("servo_2");
+        shooterLeft = hardwareMap.dcMotor.get("shoot_left");
+        shooterRight = hardwareMap.dcMotor.get("shoot_right");
+        beaconPressServoTurnyThingThatChangesWhenYouDetectColors = hardwareMap.servo.get("servo_1");
         /**
          * Start up Vuforia, telling it the id of the view that we wish to use as the parent for
          * the camera monitor feedback; if no camera monitor feedback is desired, use the parameterless
@@ -92,7 +120,7 @@ public class Autonomous_Vuforia_Gyro_Test extends LinearOpMode {
          * documentation directory.
          */
         VuforiaTrackables visionTargets = this.vuforia.loadTrackablesFromAsset("FTC_2016-17");
-        VuforiaTrackable target = visionTargets.get(1);
+        VuforiaTrackable target = visionTargets.get(1); // Tools
         target.setName("Target");  // Stones
 
         /** For convenience, gather together all the trackable objects in one easily-iterable collection */
@@ -202,6 +230,211 @@ public class Autonomous_Vuforia_Gyro_Test extends LinearOpMode {
                         AngleUnit.DEGREES, -90, 0, 0));
         RobotLog.ii(TAG, "phone=%s", format(phoneLocationOnRobot));
 
+        ((VuforiaTrackableDefaultListener)target.getListener()).setPhoneInformation(phoneLocationOnRobot, parameters.cameraDirection);
+
+        /** Wait for the game to begin */
+        telemetry.addData(">", "Press Play to start tracking");
+        telemetry.update();
+
+        /*
+         * Initialize the drive system variables.
+         * The init() method of the hardware class does all the work here
+         */
+        robot.init(hardwareMap);
+
+        // Send telemetry message to signify robot waiting;
+        telemetry.addData("Status", "Resetting Encoders");    //
+        telemetry.update();
+
+        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        idle();
+
+        leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Send telemetry message to indicate successful Encoder reset
+        telemetry.addData("Path0",  "Starting at %7d :%7d",
+                leftMotor.getCurrentPosition(),
+                rightMotor.getCurrentPosition());
+        telemetry.update();
+
+
+        waitForStart();
+
+        visionTargets.activate();
+
+
+        gyroDrive(1, -48, 0);
+
+        autonomousShoot();
+
+        gyroDrive(1, -12, 0);
+
+        gyroTurn(0.1, 90);
+        gyroDrive(1, 36, 0);
+        vuforiaDetect();
+
+    }
+
+    private void autonomousShoot() {
+        double currTime = this.time;
+        while (this.time - currTime < 1.5) {
+            // wait
+        }
+
+        ballFlipperUpper.setPosition(0.2);
+
+        ballFlipperUpper.setPosition(STOP_POSITION);
+
+        currTime = this.time;
+
+        while(this.time - currTime < 3) {
+            shooterLeft.setPower(0.5);
+            shooterRight.setPower(-0.5);
+        }
+
+        stopRobot();
+    }
+
+    public void stopRobot(){
+        shooterLeft.setPower(0);
+        shooterRight.setPower(0);
+        ballFlipperUpper.setPosition(STOP_POSITION);
+    }
+
+    private void vuforiaDetect() {
+
+        double currTime = this.time;
+
+        while (this.time - currTime < 5) {
+            for (VuforiaTrackable trackable : allTrackables) {
+                /**
+                 * getUpdatedRobotLocation() will return null if no new information is available since
+                 * the last time that call was made, or if the trackable is not currently visible.
+                 * getRobotLocation() will return null if the trackable is not currently visible.
+                 */
+                telemetry.addData(trackable.getName(), ((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible() ? "Visible" : "Not Visible");    //
+
+                if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
+
+                    try {
+                        gyroDrive(1, -24, 0);
+                        beaconPress();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else {
+                    /*
+                    Turns the robot left
+                     */
+                    rightMotor.setPower(0.5);
+                    leftMotor.setPower(-0.5);
+                }
+
+                OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+                if (robotLocationTransform != null) {
+                    lastLocation = robotLocationTransform;
+                }
+            }
+            /**
+             * Provide feedback as to where the robot was last located (if we know).
+             */
+            if (lastLocation != null) { // If has moved
+                //  RobotLog.vv(TAG, "robot=%s", format(lastLocation));
+                telemetry.addData("Pos", format(lastLocation));
+            } else {
+                telemetry.addData("Pos", "Unknown");
+            }
+            telemetry.update();
+            // Took out idle(). Check if this affects anything.
+        }
+    }
+
+    public void beaconPress () {
+        float hsvValues[] = {0F, 0F, 0F};
+
+        // values is a reference to the hsvValues array.
+        final float values[] = hsvValues;
+
+        // get a reference to the RelativeLayout so we can change the background
+        // color of the Robot Controller app to match the hue detected by the RGB sensor.
+        final View relativeLayout = ((Activity) hardwareMap.appContext).findViewById(com.qualcomm.ftcrobotcontroller.R.id.RelativeLayout);
+
+        // bPrevState and bCurrState represent the previous and current state of the button.
+        boolean bPrevState = false;
+        boolean bCurrState = false;
+
+        // bLedOn represents the state of the LED.
+        boolean bLedOn = true;
+
+        // Set the LED in the beginning
+        //colorSensor.enableLed(bLedOn);
+        colorSensor.enableLed(false);
+
+        // wait for the start button to be pressed.
+
+        // check the status of the x button on either gamepad.
+        bCurrState = gamepad1.x;
+
+        // check for button state transitions.
+        if ((bCurrState == true) && (bCurrState != bPrevState)) {
+
+            // button is transitioning to a pressed state. So Toggle LED
+            bLedOn = !bLedOn;
+            colorSensor.enableLed(bLedOn);
+        }
+
+        // update previous state variable.
+        bPrevState = bCurrState;
+
+        // convert the RGB values to HSV values.
+        // Color.RGBToHSV(colorSensor.red() * 8, colorSensor.green() * 8, colorSensor.blue() * 8, hsvValues);
+
+        // send the info back to driver station using telemetry function.
+        telemetry.addData("LED", bLedOn ? "On" : "Off");
+        telemetry.addData("Clear", colorSensor.alpha());
+        telemetry.addData("Red  ", colorSensor.red());
+        telemetry.addData("Green", colorSensor.green());
+        telemetry.addData("Blue ", colorSensor.blue());
+        telemetry.addData("Hue", hsvValues[0]);
+
+        if (colorSensor.red() - colorSensor.blue() > 0.5) {
+            telemetry.addData("This is", "Red!");
+            // Red beacon Press
+            try {
+                gyroDrive(1, 2, 0);
+                beaconPressServoTurnyThingThatChangesWhenYouDetectColors.setPosition(0.7);
+                gyroDrive(1, -6, 0);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+        }
+        else if (colorSensor.blue() - colorSensor.red() > 0.5) {
+            telemetry.addData("This is", "Blue!");
+            // Blue Beacon Press
+            try {
+                gyroDrive(1, 2, 0);
+                beaconPressServoTurnyThingThatChangesWhenYouDetectColors.setPosition(0.2);
+                gyroDrive(1, -6, 0);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // change the background color to match the color detected by the RGB sensor.
+        // pass a reference to the hue, saturation, and value array as an argument
+        // to the HSVToColor method.
+        relativeLayout.post(new Runnable() {
+            public void run() {
+                relativeLayout.setBackgroundColor(Color.HSVToColor(0xff, values));
+            }
+        });
+
+        telemetry.update();
+
     }
 
     /**
@@ -210,5 +443,152 @@ public class Autonomous_Vuforia_Gyro_Test extends LinearOpMode {
      */
     String format(OpenGLMatrix transformationMatrix) {
         return transformationMatrix.formatAsTransform();
+    }
+
+    public void gyroDrive ( double speed,
+                            double distance,
+                            double angle) throws InterruptedException {
+
+        int     newLeftTarget;
+        int     newRightTarget;
+        int     moveCounts;
+        double  max;
+        double  error;
+        double  steer;
+        double  leftSpeed;
+        double  rightSpeed;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            moveCounts = (int)(distance * COUNTS_PER_INCH);
+            newLeftTarget = leftMotor.getCurrentPosition() + moveCounts;
+            newRightTarget = rightMotor.getCurrentPosition() + moveCounts;
+
+            // Set Target and Turn On RUN_TO_POSITION
+            leftMotor.setTargetPosition(newLeftTarget);
+            rightMotor.setTargetPosition(newRightTarget);
+
+            leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // start motion.
+            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            leftMotor.setPower(speed);
+            rightMotor.setPower(speed);
+
+            // keep looping while we are still active, and BOTH motors are running.
+            while (opModeIsActive() &&
+                    (leftMotor.isBusy() && rightMotor.isBusy())) {
+
+                // adjust relative speed based on heading error.
+                error = getError(angle);
+                steer = getSteer(error, P_DRIVE_COEFF);
+
+                // if driving in reverse, the motor correction also needs to be reversed
+                if (distance < 0)
+                    steer *= -1.0;
+
+                leftSpeed = speed - steer;
+                rightSpeed = speed + steer;
+
+                // Normalize speeds if any one exceeds +/- 1.0;
+                max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
+                if (max > 1.0)
+                {
+                    leftSpeed /= max;
+                    rightSpeed /= max;
+                }
+
+                leftMotor.setPower(leftSpeed);
+                rightMotor.setPower(rightSpeed);
+
+                // Display drive status for the driver.
+                telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, steer);
+                telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
+                telemetry.addData("Actual",  "%7d:%7d",      leftMotor.getCurrentPosition(),
+                        rightMotor.getCurrentPosition());
+                telemetry.addData("Speed",   "%5.2f:%5.2f",  leftSpeed, rightSpeed);
+                telemetry.update();
+
+                // Allow time for other processes to run.
+                idle();
+            }
+
+            // Stop all motion;
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+
+    public double getError(double targetAngle) {
+
+        double robotError;
+
+        // calculate error in -179 to +180 range  (
+        robotError = targetAngle - gyro.getIntegratedZValue();
+        while (robotError > 180)  robotError -= 360;
+        while (robotError <= -180) robotError += 360;
+        return robotError;
+    }
+
+    /**
+     * returns desired steering force.  +/- 1 range.  +ve = steer left
+     * @param error   Error angle in robot relative degrees
+     * @param PCoeff  Proportional Gain Coefficient
+     * @return
+     */
+    public double getSteer(double error, double PCoeff) {
+        return Range.clip(error * PCoeff, -1, 1);
+    }
+
+    public void gyroTurn (  double speed, double angle)
+            throws InterruptedException {
+
+        // keep looping while we are still active, and not on heading.
+        while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
+            // Update telemetry & Allow time for other processes to run.
+            telemetry.update();
+            idle();
+        }
+    }
+
+    boolean onHeading(double speed, double angle, double PCoeff) {
+        double   error ;
+        double   steer ;
+        boolean  onTarget = false ;
+        double leftSpeed;
+        double rightSpeed;
+
+        // determine turn power based on +/- error
+        error = getError(angle);
+
+        if (Math.abs(error) <= HEADING_THRESHOLD) {
+            steer = 0.0;
+            leftSpeed  = 0.0;
+            rightSpeed = 0.0;
+            onTarget = true;
+        }
+        else {
+            steer = getSteer(error, PCoeff);
+            rightSpeed  = speed * steer;
+            leftSpeed   = -rightSpeed;
+        }
+
+        // Send desired speeds to motors.
+        leftMotor.setPower(leftSpeed);
+        rightMotor.setPower(rightSpeed);
+
+        // Display it for the driver.
+        telemetry.addData("Target", "%5.2f", angle);
+        telemetry.addData("Err/St", "%5.2f/%5.2f", error, steer);
+        telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
+
+        return onTarget;
     }
 }
