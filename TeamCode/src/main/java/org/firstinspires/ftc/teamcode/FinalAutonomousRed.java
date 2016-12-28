@@ -1,20 +1,22 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 
 /**
- * Created by Tejas Narayanan on 11/30/16.
+ * Created by ShruthiJaganathan on 12/27/16.
  */
 
-@Autonomous(name= "Gyro Test", group = "Autonomous")
-public class GyroTest extends LinearOpMode {
+@Autonomous(name= "Final Autonomous Red Strategy 1", group = "Autonomous")
+public class FinalAutonomousRed extends LinearOpMode{
 
     static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
     static final double     P_TURN_COEFF            = 0.1;     // Larger is more responsive, but also less stable
@@ -27,14 +29,33 @@ public class GyroTest extends LinearOpMode {
             (WHEEL_DIAMETER_INCHES * 3.1415);
 
     ModernRoboticsI2cGyro gyro;
-    DcMotor leftMotor;
-    DcMotor rightMotor;
+    DcMotor leftMotor; //Wheels left
+    DcMotor rightMotor; //Wheels right
 
-    @Override
+    DcMotor ballLeft; //Ball Shooter left motor
+    DcMotor ballRight; //Ball Shooter right motor
+
+    Servo flipper;
+    Servo beaconServo;
+    ColorSensor cr;
+
+
+
     public void runOpMode() throws InterruptedException {
         gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
         leftMotor = hardwareMap.dcMotor.get("left_m");
         rightMotor = hardwareMap.dcMotor.get("right_m");
+        beaconServo = hardwareMap.servo.get("beacon");
+        cr = hardwareMap.colorSensor.get("mr");
+        ballLeft = hardwareMap.dcMotor.get("ball_left");
+        ballRight = hardwareMap.dcMotor.get("ball_right");
+        flipper = hardwareMap.servo.get("flipper");
+
+
+        beaconServo.setPosition(0.5);
+        flipper.setPosition(0.5);
+
+        waitForStart();
 
         gyro.calibrate();
 
@@ -47,9 +68,74 @@ public class GyroTest extends LinearOpMode {
         gyro.resetZAxisIntegrator();
 
         rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        gyroDrive(1, 60, 0);
-        gyroTurn(0.1, 90);
-        gyroDrive(1, 24, 0);
+
+        //Going backwards, and since the right motor has already been reversed, pass in motor speed of -1.
+
+        gyroDrive(-1, 48, 0);
+        //shoot the ball
+        gyroDrive(1, 12, 0); //move "forward" to make sure we don't run over the center
+        gyroTurn(0.1, 90); // turn left 90 based on the front side [+90 due to reverse]
+
+        gyroDrive(-1, 24, 0);
+        gyroTurn(0.1, -90); //turn right 90 based on front [-90 due to reverse]
+        gyroDrive(-0.1, 24, 0);
+        gyroTurn(0.1, 90); //turn left 90 based on front [+90 due to reverse]
+        //Vuforia Check
+        gyroDrive(-1, 32, 0);
+        beaconPressSwitch();
+        gyroDrive(-1, 2, 0);
+
+
+    }
+
+    public void ballShoot() {
+        //lift up ball using servo
+        //shoot ball
+        //stop ball
+
+        flipper.setPosition(0.7);
+        ballRight.setPower(-1);
+        ballLeft.setPower(1);
+
+        double origTime = this.time;
+
+        while(this.time - origTime <= 5){
+            //wait to make sure the ball has been caught and shot out
+        }
+
+        flipper.setPosition(0.5);
+        ballLeft.setPower(0);
+        ballRight.setPower(0);
+
+
+    }
+
+    public void beaconPressSwitch() throws InterruptedException {
+
+        cr.enableLed(false);
+
+        //Color.RGBToHSV(cr.red() * 8, cr.green() * 8, cr.blue() * 8, hsvValues);
+        while (opModeIsActive()) {
+            double redV = cr.red();
+            double blueV = cr.blue();
+
+            telemetry.addData("Red  ", cr.red());
+            telemetry.addData("Green", cr.green());
+            telemetry.addData("Blue ", cr.blue());
+
+
+            if (blueV - redV > 0.5) {
+                beaconServo.setPosition(0.3);
+                telemetry.addData("This is blue!", cr.blue());
+            } else if (redV - blueV > 0.5) {
+                beaconServo.setPosition(0.7);
+                telemetry.addData("This is red!", cr.red());
+            } else {
+                beaconServo.setPosition(0.5);
+            }
+
+            idle();
+        }
 
     }
 

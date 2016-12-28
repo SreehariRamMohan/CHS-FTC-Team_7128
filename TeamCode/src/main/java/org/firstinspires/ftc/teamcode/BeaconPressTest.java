@@ -39,7 +39,7 @@ public class BeaconPressTest extends LinearOpMode {
     @Override
     public void runOpMode()  throws InterruptedException, NullPointerException {
 
-        servo1 = hardwareMap.servo.get("servo_1");
+        servo1 = hardwareMap.servo.get("beacon");
         cr = hardwareMap.colorSensor.get("mr");
 
         servo1.setPosition(0.5);
@@ -64,10 +64,10 @@ public class BeaconPressTest extends LinearOpMode {
             if (blueV - redV > 0.5) {
                 //if blue is our team color
                 //press the button , move closer
-                servo1.setPosition(0.2);
+                servo1.setPosition(0.1);
                 telemetry.addData("This is blue!", cr.blue());
             } else if (redV - blueV > 0.5) {
-                servo1.setPosition(0.7);
+                servo1.setPosition(0.9);
                 //press the button, move closer
                 telemetry.addData("This is red!", cr.red());
             }

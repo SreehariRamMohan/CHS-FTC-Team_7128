@@ -11,12 +11,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @TeleOp(name="Turning: TeleOp", group="Opmode")
 public class TurningTest_TeleOp extends OpMode {
 
+
     DcMotor rightMotor; // Right side wheels
     DcMotor leftMotor; // Left Side Wheels
+    DcMotor sweeper; // Sweeper motor
 
     public void init(){
         rightMotor = hardwareMap.dcMotor.get("right_m");
         leftMotor = hardwareMap.dcMotor.get("left_m");
+        sweeper = hardwareMap.dcMotor.get("sweeper_m");
     }
 
     @Override
@@ -40,5 +43,18 @@ public class TurningTest_TeleOp extends OpMode {
         else {
             leftMotor.setPower(0);
         }
+
+
+
+        if(gamepad2.dpad_up){
+            sweeper.setPower(1); //surgical tubing forward
+        } else if(gamepad2.dpad_down) {
+            sweeper.setPower(-1); // surgical tubing backward
+        } else {
+            sweeper.setPower(0); //else: stop surgical tubing
+        }
+
+
+
     }
 }
