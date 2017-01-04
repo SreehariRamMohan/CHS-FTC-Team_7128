@@ -24,9 +24,9 @@ public class TeleOp_v1  extends OpMode{
     @Override
     public void init() {
         beaconServo = hardwareMap.servo.get("beacon");
-        //flipperServo = hardwareMap.servo.get("flipper");
-        //ballRightMotor = hardwareMap.dcMotor.get("ball_right");
-        //ballLeftMotor = hardwareMap.dcMotor.get("ball_left");
+        flipperServo = hardwareMap.servo.get("flipper");
+        ballRightMotor = hardwareMap.dcMotor.get("ball_right");
+        ballLeftMotor = hardwareMap.dcMotor.get("ball_left");
         rightMotor = hardwareMap.dcMotor.get("right_m");
         leftMotor = hardwareMap.dcMotor.get("left_m");
         sweeper = hardwareMap.dcMotor.get("sweeper_m");
@@ -72,9 +72,13 @@ public class TeleOp_v1  extends OpMode{
 
 */
 
+
+        //gamepad 2
+
+
         if(gamepad2.dpad_down){
             sweeper.setPower(1); //surgical tubing forward
-        } else if(gamepad2 .dpad_up) {
+        } else if(gamepad2.dpad_up) {
             sweeper.setPower(-1); // surgical tubing backward
         } else {
             sweeper.setPower(0); //else: stop surgical tubing
@@ -89,7 +93,11 @@ public class TeleOp_v1  extends OpMode{
             beaconServo.setPosition(0.5); //caution: stop
         }
 
-        //gamepad 2
+        if(gamepad1.a){
+            flipperServo.setPosition(0.5);
+        } else{
+            flipperServo.setPosition(1);
+        }
 
         /*
         if(gamepad2.dpad_left){
@@ -111,16 +119,17 @@ public class TeleOp_v1  extends OpMode{
         } else if(gamepad2.x){
             flipperServo.setPosition(0.5); //stop ball shooter servo
         }
+        */
 
-        if(gamepad2.right_trigger > 0.5){
+        if(gamepad2.y){
             ballLeftMotor.setPower(1); //turn on ball shooting motor
             ballRightMotor.setPower(-1);
-        } else if(gamepad2.b){
+        } else if(gamepad2.x){
             ballLeftMotor.setPower(0); //stop ball shooting motor
             ballRightMotor.setPower(0);
         }
 
-        */
+
 
         /*else if(gamepad2.right_stick_y == -1){
             ballLeftMotor.setPower(-1); //turn motor backwards

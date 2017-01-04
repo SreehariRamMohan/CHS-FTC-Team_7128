@@ -6,23 +6,29 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  * Created by ShruthiJaganathan on 10/16/16.
  */
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name="Ball Shooter Test TeleOp", group="Test Opmode")
-public class BallShooterTest extends LinearOpMode{
+public class BallShooterTest extends OpMode{
 
-    DcMotor ballLeftMotor = hardwareMap.dcMotor.get("ball_left");
-    DcMotor ballRightMotor = hardwareMap.dcMotor.get("ball_right");
+    DcMotor ballLeftMotor;
+    DcMotor ballRightMotor;
     /*
     final double STOP_POSITION  = 0.5;
     double currTime;
     */
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void init() {
+        ballLeftMotor = hardwareMap.dcMotor.get("ball_left");
+        ballRightMotor = hardwareMap.dcMotor.get("ball_right");
+    }
+
+    @Override
+    public void loop() {
         /*
         //bottom : a; right : b; left: x; top: y
         if(gamepad1.y){

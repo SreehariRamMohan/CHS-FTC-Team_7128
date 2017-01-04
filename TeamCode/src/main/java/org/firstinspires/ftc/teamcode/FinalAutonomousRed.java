@@ -47,8 +47,8 @@ public class FinalAutonomousRed extends LinearOpMode{
         rightMotor = hardwareMap.dcMotor.get("right_m");
         beaconServo = hardwareMap.servo.get("beacon");
         cr = hardwareMap.colorSensor.get("mr");
-        ballLeft = hardwareMap.dcMotor.get("ball_left");
-        ballRight = hardwareMap.dcMotor.get("ball_right");
+        //ballLeft = hardwareMap.dcMotor.get("ball_left");
+        //ballRight = hardwareMap.dcMotor.get("ball_right");
         flipper = hardwareMap.servo.get("flipper");
 
 
@@ -72,7 +72,7 @@ public class FinalAutonomousRed extends LinearOpMode{
         //Going backwards, and since the right motor has already been reversed, pass in motor speed of -1.
 
         gyroDrive(-1, 48, 0);
-        //shoot the ball
+        //ballShoot();
         gyroDrive(1, 12, 0); //move "forward" to make sure we don't run over the center
         gyroTurn(0.1, 90); // turn left 90 based on the front side [+90 due to reverse]
 
@@ -125,10 +125,10 @@ public class FinalAutonomousRed extends LinearOpMode{
 
 
             if (blueV - redV > 0.5) {
-                beaconServo.setPosition(0.3);
+                beaconServo.setPosition(0);
                 telemetry.addData("This is blue!", cr.blue());
             } else if (redV - blueV > 0.5) {
-                beaconServo.setPosition(0.7);
+                beaconServo.setPosition(1);
                 telemetry.addData("This is red!", cr.red());
             } else {
                 beaconServo.setPosition(0.5);
