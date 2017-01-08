@@ -38,6 +38,7 @@ public class TeleOp_v1  extends OpMode{
         // Gamepad 1
         currTime = this.time;
 
+        //Movement of right wheel
         if (gamepad1.right_stick_y == -1) {
             rightMotor.setPower(-1);
         }
@@ -48,6 +49,8 @@ public class TeleOp_v1  extends OpMode{
             rightMotor.setPower(0);
         }
 
+
+        //Movement of left wheel
         if (gamepad1.left_stick_y == -1) {
             leftMotor.setPower(1);
         }
