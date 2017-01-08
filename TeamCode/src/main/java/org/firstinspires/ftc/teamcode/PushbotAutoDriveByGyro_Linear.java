@@ -1,30 +1,88 @@
-package org.firstinspires.ftc.teamcode;
+/*
+All rights reserved.
 
-import android.graphics.Color;
+Redistribution and use in source and binary forms, with or without modification,
+are permitted (subject to the limitations in the disclaimer below) provided that
+the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list
+of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
+
+Neither the name of Robert Atkinson nor the names of his contributors may be used to
+endorse or promote products derived from this software without specific prior
+written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESSFOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 /**
- * Created by ShruthiJaganathan on 12/27/16.
+ * This file illustrates the concept of driving a path based on Gyro heading and encoder counts.
+ * It uses the common Pushbot hardware class to define the drive on the robot.
+ * The code is structured as a LinearOpMode
+ *
+ * The code REQUIRES that you DO have encoders on the wheels,
+ *   otherwise you would use: PushbotAutoDriveByTime;
+ *
+ *  This code ALSO requires that you have a Modern Robotics I2C gyro with the name "gyro"
+ *   otherwise you would use: PushbotAutoDriveByEncoder;
+ *
+ *  This code requires that the drive Motors have been configured such that a positive
+ *  power command moves them forward, and causes the encoders to count UP.
+ *
+ *  This code uses the RUN_TO_POSITION mode to enable the Motor controllers to generate the run profile
+ *
+ *  In order to calibrate the Gyro correctly, the robot must remain stationary during calibration.
+ *  This is performed when the INIT button is pressed on the Driver Station.
+ *  This code assumes that the robot is stationary when the INIT button is pressed.
+ *  If this is not the case, then the INIT should be performed again.
+ *
+ *  Note: in this example, all angles are referenced to the initial coordinate frame set during the
+ *  the Gyro Calibration process, or whenever the program issues a resetZAxisIntegrator() call on the Gyro.
+ *
+ *  The angle of movement/rotation is assumed to be a standardized rotation around the robot Z axis,
+ *  which means that a Positive rotation is Counter Clock Wise, looking down on the field.
+ *  This is consistent with the FTC field coordinate conventions set out in the document:
+ *  ftc_app\doc\tutorial\FTC_FieldCoordinateSystemDefinition.pdf
+ *
+ * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
+ * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name= "Final Autonomous Red Strategy 1", group = "Autonomous")
-public class FinalAutonomousRed extends LinearOpMode{
+@Autonomous(name="Pushbot: Auto Drive By Gyro", group="Pushbot")
+public class PushbotAutoDriveByGyro_Linear extends LinearOpMode {
 
+    /* Declare OpMode members. */
+   // HardwarePushbot         robot   = new HardwarePushbot();   // Use a Pushbot's hardware
     ModernRoboticsI2cGyro   gyro        = null;                    // Additional Gyro device
     DcMotor                 leftMotor   = null;
     DcMotor                 rightMotor  = null;
 
     static final double     COUNTS_PER_MOTOR_REV    = 1440 ;    // eg: TETRIX Motor Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 0.75 ;     // This is < 1.0 if geared UP
+    static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
@@ -38,30 +96,26 @@ public class FinalAutonomousRed extends LinearOpMode{
     static final double     P_TURN_COEFF            = 0.1;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.15;     // Larger is more responsive, but also less stable
 
-    DcMotor ballLeft; //Ball Shooter left motor
-    DcMotor ballRight; //Ball Shooter right motor
-    DcMotor sweeper;
 
-    Servo flipper;
-    Servo beaconServo;
-    ColorSensor cr;
-
-
-
+    @Override
     public void runOpMode() throws InterruptedException {
+
+        /*
+         * Initialize the standard drive system variables.
+         * The init() method of the hardware class does most of the work here
+         */
+        //robot.init(hardwareMap);
         gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
-        leftMotor = hardwareMap.dcMotor.get("left_m");
-        rightMotor = hardwareMap.dcMotor.get("right_m");
-        beaconServo = hardwareMap.servo.get("beacon");
-        cr = hardwareMap.colorSensor.get("mr");
-        ballLeft = hardwareMap.dcMotor.get("ball_left");
-        ballRight = hardwareMap.dcMotor.get("ball_right");
-        flipper = hardwareMap.servo.get("flipper");
-        sweeper = hardwareMap.dcMotor.get("sweeper_m");
+        leftMotor = (DcMotor) hardwareMap.dcMotor.get("left_m");
+        rightMotor = (DcMotor) hardwareMap.dcMotor.get("right_m");
 
+        // Ensure the robot it stationary, then reset the encoders and calibrate the gyro.
+        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        beaconServo.setPosition(0.5);
-        flipper.setPosition(1);
+        // Send telemetry message to alert driver that we are calibrating;
+        telemetry.addData(">", "Calibrating Gyro");    //
+        telemetry.update();
 
         gyro.calibrate();
 
@@ -71,130 +125,53 @@ public class FinalAutonomousRed extends LinearOpMode{
             idle();
         }
 
+        telemetry.addData(">", "Robot Ready.");    //
+        telemetry.update();
+
+        leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Wait for the game to start (Display Gyro value), and reset gyro before we move..
+        while (!isStarted()) {
+            telemetry.addData(">", "Robot Heading = %d", gyro.getIntegratedZValue());
+            telemetry.update();
+            idle();
+        }
         gyro.resetZAxisIntegrator();
+
+        // Step through each leg of the path,
+        // Note: Reverse movement is obtained by setting a negative distance (not speed)
+        // Put a hold after each turn
 
         rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        //Going backwards, and since the right motor has already been reversed, pass in motor speed of -1.
+        gyroDrive(DRIVE_SPEED, 48.0, 0.0);    // Drive FWD 48 inches
+        gyroTurn( TURN_SPEED, -45.0);         // Turn  CCW to -45 Degrees
+        gyroHold( TURN_SPEED, -45.0, 0.5);    // Hold -45 Deg heading for a 1/2 second
+        gyroTurn( TURN_SPEED,  45.0);         // Turn  CW  to  45 Degrees
+        gyroHold( TURN_SPEED,  45.0, 0.5);    // Hold  45 Deg heading for a 1/2 second
+        gyroTurn( TURN_SPEED,   0.0);         // Turn  CW  to   0 Degrees
+        gyroHold( TURN_SPEED,   0.0, 1.0);    // Hold  0 Deg heading for a 1 second
+        gyroDrive(DRIVE_SPEED,-48.0, 0.0);    // Drive REV 48 inches
+        gyroHold( TURN_SPEED,   0.0, 0.5);    // Hold  0 Deg heading for a 1/2 second
 
-        waitForStart();
-
-        gyroDrive(1, 26, 0);
-        //wait(0.5);
-        ballShoot();
-        //wait(0.5);
-        /*
-        sweeper.setPower(1);
-        wait(1);
-        //wait(1);
-        ballShoot();
-        sweeper.setPower(0);
-        */
-
-        gyroTurn(0.1, -90); // turn left 90 based on the front side [+90 due to reverse]
-        wait(0.5);
-        gyroDrive(1, -24, 90);
-        wait(0.5);
-        gyroTurn(0.1, -90); //turn right 90 based on front [-90 due to reverse]
-        wait(0.5);
-        gyroDrive(1, -18, 180);
-        wait(0.5);
-        gyroTurn(0.1, 90); //turn left 90 based on front [+90 due to reverse]
-        //Vuforia Check
-        wait(0.5);
-        gyroDrive(1, -34, 90);
-        wait(0.5);
-        beaconPressSwitch();
-        wait(0.5);
-        gyroDrive(1, -2, 90);
-
+        telemetry.addData("Path", "Complete");
+        telemetry.update();
     }
 
-    public void wait(double seconds) {
-        double origTime = this.time;
 
-        while(this.time - origTime <= seconds){
-            //wait
-        }
-    }
-
-    public void ballShoot() {
-        //lift up ball using servo
-        //shoot ball
-        //stop ball
-
-        ballRight.setPower(-1);
-        ballLeft.setPower(1);
-
-        wait(3.0);
-
-        flipper.setPosition(0.7);
-
-        wait(1.0);
-
-        flipper.setPosition(1);
-        ballLeft.setPower(0);
-        ballRight.setPower(0);
-
-
-    }
-
-    public void beaconPressSwitch() throws InterruptedException {
-
-        cr.enableLed(false);
-
-        //Color.RGBToHSV(cr.red() * 8, cr.green() * 8, cr.blue() * 8, hsvValues);
-
-        int blueCount = 0, redCount = 0;
-        int globalCount = 0;
-
-        while (globalCount < 5) {
-            double redV = cr.red();
-            double blueV = cr.blue();
-
-            telemetry.addData("Red  ", cr.red());
-            telemetry.addData("Green", cr.green());
-            telemetry.addData("Blue ", cr.blue());
-
-
-            if (blueV - redV > 0.5) {
-                blueCount++;
-                globalCount++;
-                telemetry.addData("This is blue!", cr.blue());
-            } else if (redV - blueV > 0.5) {
-                redCount++;
-                globalCount++;
-                telemetry.addData("This is red!", cr.red());
-            } else {
-                beaconServo.setPosition(0.5);
-            }
-
-            double time = this.time;
-            while (this.time - time < 0.2) {
-                // wait
-            }
-        }
-
-        if (blueCount > redCount) {
-            beaconServo.setPosition(0);
-        } else {
-            beaconServo.setPosition(1);
-        }
-
-    }
-
-    /**
-     *  Method to drive on a fixed compass bearing (angle), based on encoder counts.
-     *  Move will stop if either of these conditions occur:
-     *  1) Move gets to the desired position
-     *  2) Driver stops the opmode running.
-     *
-     * @param speed      Target speed for forward motion.  Should allow for _/- variance for adjusting heading
-     * @param distance   Distance (in inches) to move from current position.  Negative distance means move backwards.
-     * @param angle      Absolute Angle (in Degrees) relative to last gyro reset.
-     *                   0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
-     *                   If a relative angle is required, add/subtract from current heading.
-     */
+   /**
+    *  Method to drive on a fixed compass bearing (angle), based on encoder counts.
+    *  Move will stop if either of these conditions occur:
+    *  1) Move gets to the desired position
+    *  2) Driver stops the opmode running.
+    *
+    * @param speed      Target speed for forward motion.  Should allow for _/- variance for adjusting heading
+    * @param distance   Distance (in inches) to move from current position.  Negative distance means move backwards.
+    * @param angle      Absolute Angle (in Degrees) relative to last gyro reset.
+    *                   0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
+    *                   If a relative angle is required, add/subtract from current heading.
+    */
     public void gyroDrive ( double speed,
                             double distance,
                             double angle) throws InterruptedException {
@@ -230,7 +207,7 @@ public class FinalAutonomousRed extends LinearOpMode{
 
             // keep looping while we are still active, and BOTH motors are running.
             while (opModeIsActive() &&
-                    (leftMotor.isBusy() && rightMotor.isBusy())) {
+                   (leftMotor.isBusy() && rightMotor.isBusy())) {
 
                 // adjust relative speed based on heading error.
                 error = getError(angle);
@@ -258,7 +235,7 @@ public class FinalAutonomousRed extends LinearOpMode{
                 telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, steer);
                 telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
                 telemetry.addData("Actual",  "%7d:%7d",      leftMotor.getCurrentPosition(),
-                        rightMotor.getCurrentPosition());
+                                                             rightMotor.getCurrentPosition());
                 telemetry.addData("Speed",   "%5.2f:%5.2f",  leftSpeed, rightSpeed);
                 telemetry.update();
 
@@ -289,7 +266,7 @@ public class FinalAutonomousRed extends LinearOpMode{
      * @throws InterruptedException
      */
     public void gyroTurn (  double speed, double angle)
-            throws InterruptedException {
+                              throws InterruptedException {
 
         // keep looping while we are still active, and not on heading.
         while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
@@ -311,7 +288,7 @@ public class FinalAutonomousRed extends LinearOpMode{
      * @throws InterruptedException
      */
     public void gyroHold( double speed, double angle, double holdTime)
-            throws InterruptedException {
+                            throws InterruptedException {
 
         ElapsedTime holdTimer = new ElapsedTime();
 

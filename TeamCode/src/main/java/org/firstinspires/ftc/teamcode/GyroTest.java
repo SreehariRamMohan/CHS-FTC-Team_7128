@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 /**
@@ -26,15 +27,31 @@ public class GyroTest extends LinearOpMode {
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
 
-    ModernRoboticsI2cGyro gyro;
-    DcMotor leftMotor;
-    DcMotor rightMotor;
+    static final double     DRIVE_SPEED             = 0.7;     // Nominal speed for better accuracy.
+    static final double     TURN_SPEED              = 0.5;     // Nominal half speed for better accuracy.
+
+    ModernRoboticsI2cGyro   gyro        = null;                    // Additional Gyro device
+    DcMotor                 leftMotor   = null;
+    DcMotor                 rightMotor  = null;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
-        leftMotor = hardwareMap.dcMotor.get("left_m");
-        rightMotor = hardwareMap.dcMotor.get("right_m");
+        /*
+         * Initialize the standard drive system variables.
+         * The init() method of the hardware class does most of the work here
+         */
+        //robot.init(hardwareMap);
+        gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
+        leftMotor = (DcMotor) hardwareMap.dcMotor.get("left_m");
+        rightMotor = (DcMotor) hardwareMap.dcMotor.get("right_m");
+
+        // Ensure the robot it stationary, then reset the encoders and calibrate the gyro.
+        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        // Send telemetry message to alert driver that we are calibrating;
+        telemetry.addData(">", "Calibrating Gyro");    //
+        telemetry.update();
 
         gyro.calibrate();
 
@@ -44,15 +61,51 @@ public class GyroTest extends LinearOpMode {
             idle();
         }
 
+        telemetry.addData(">", "Robot Ready.");    //
+        telemetry.update();
+
+        leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // Wait for the game to start (Display Gyro value), and reset gyro before we move..
+        while (!isStarted()) {
+            telemetry.addData(">", "Robot Heading = %d", gyro.getIntegratedZValue());
+            telemetry.update();
+            idle();
+        }
         gyro.resetZAxisIntegrator();
 
+        // Step through each leg of the path,
+        // Note: Reverse movement is obtained by setting a negative distance (not speed)
+        // Put a hold after each turn
+
         rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        gyroDrive(1, 60, 0);
-        gyroTurn(0.1, 90);
-        gyroDrive(1, 24, 0);
 
+        gyroDrive(DRIVE_SPEED, 48.0, 0.0);    // Drive FWD 48 inches
+        gyroTurn( TURN_SPEED, -45.0);         // Turn  CCW to -45 Degrees
+        gyroHold( TURN_SPEED, -45.0, 0.5);    // Hold -45 Deg heading for a 1/2 second
+        gyroTurn( TURN_SPEED,  45.0);         // Turn  CW  to  45 Degrees
+        gyroHold( TURN_SPEED,  45.0, 0.5);    // Hold  45 Deg heading for a 1/2 second
+        gyroTurn( TURN_SPEED,   0.0);         // Turn  CW  to   0 Degrees
+        gyroHold( TURN_SPEED,   0.0, 1.0);    // Hold  0 Deg heading for a 1 second
+        gyroDrive(DRIVE_SPEED,-48.0, 0.0);    // Drive REV 48 inches
+        gyroHold( TURN_SPEED,   0.0, 0.5);    // Hold  0 Deg heading for a 1/2 second
+
+        telemetry.addData("Path", "Complete");
+        telemetry.update();
     }
-
+    /**
+     *  Method to drive on a fixed compass bearing (angle), based on encoder counts.
+     *  Move will stop if either of these conditions occur:
+     *  1) Move gets to the desired position
+     *  2) Driver stops the opmode running.
+     *
+     * @param speed      Target speed for forward motion.  Should allow for _/- variance for adjusting heading
+     * @param distance   Distance (in inches) to move from current position.  Negative distance means move backwards.
+     * @param angle      Absolute Angle (in Degrees) relative to last gyro reset.
+     *                   0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
+     *                   If a relative angle is required, add/subtract from current heading.
+     */
     public void gyroDrive ( double speed,
                             double distance,
                             double angle) throws InterruptedException {
@@ -134,27 +187,18 @@ public class GyroTest extends LinearOpMode {
         }
     }
 
-    public double getError(double targetAngle) {
-
-        double robotError;
-
-        // calculate error in -179 to +180 range  (
-        robotError = targetAngle - gyro.getIntegratedZValue();
-        while (robotError > 180)  robotError -= 360;
-        while (robotError <= -180) robotError += 360;
-        return robotError;
-    }
-
     /**
-     * returns desired steering force.  +/- 1 range.  +ve = steer left
-     * @param error   Error angle in robot relative degrees
-     * @param PCoeff  Proportional Gain Coefficient
-     * @return
+     *  Method to spin on central axis to point in a new direction.
+     *  Move will stop if either of these conditions occur:
+     *  1) Move gets to the heading (angle)
+     *  2) Driver stops the opmode running.
+     *
+     * @param speed Desired speed of turn.
+     * @param angle      Absolute Angle (in Degrees) relative to last gyro reset.
+     *                   0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
+     *                   If a relative angle is required, add/subtract from current heading.
+     * @throws InterruptedException
      */
-    public double getSteer(double error, double PCoeff) {
-        return Range.clip(error * PCoeff, -1, 1);
-    }
-
     public void gyroTurn (  double speed, double angle)
             throws InterruptedException {
 
@@ -166,6 +210,46 @@ public class GyroTest extends LinearOpMode {
         }
     }
 
+    /**
+     *  Method to obtain & hold a heading for a finite amount of time
+     *  Move will stop once the requested time has elapsed
+     *
+     * @param speed      Desired speed of turn.
+     * @param angle      Absolute Angle (in Degrees) relative to last gyro reset.
+     *                   0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
+     *                   If a relative angle is required, add/subtract from current heading.
+     * @param holdTime   Length of time (in seconds) to hold the specified heading.
+     * @throws InterruptedException
+     */
+    public void gyroHold( double speed, double angle, double holdTime)
+            throws InterruptedException {
+
+        ElapsedTime holdTimer = new ElapsedTime();
+
+        // keep looping while we have time remaining.
+        holdTimer.reset();
+        while (opModeIsActive() && (holdTimer.time() < holdTime)) {
+            // Update telemetry & Allow time for other processes to run.
+            onHeading(speed, angle, P_TURN_COEFF);
+            telemetry.update();
+            idle();
+        }
+
+        // Stop all motion;
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
+    }
+
+    /**
+     * Perform one cycle of closed loop heading control.
+     *
+     * @param speed     Desired speed of turn.
+     * @param angle     Absolute Angle (in Degrees) relative to last gyro reset.
+     *                  0 = fwd. +ve is CCW from fwd. -ve is CW from forward.
+     *                  If a relative angle is required, add/subtract from current heading.
+     * @param PCoeff    Proportional Gain coefficient
+     * @return
+     */
     boolean onHeading(double speed, double angle, double PCoeff) {
         double   error ;
         double   steer ;
@@ -198,6 +282,33 @@ public class GyroTest extends LinearOpMode {
         telemetry.addData("Speed.", "%5.2f:%5.2f", leftSpeed, rightSpeed);
 
         return onTarget;
+    }
+
+    /**
+     * getError determines the error between the target angle and the robot's current heading
+     * @param   targetAngle  Desired angle (relative to global reference established at last Gyro Reset).
+     * @return  error angle: Degrees in the range +/- 180. Centered on the robot's frame of reference
+     *          +ve error means the robot should turn LEFT (CCW) to reduce error.
+     */
+    public double getError(double targetAngle) {
+
+        double robotError;
+
+        // calculate error in -179 to +180 range  (
+        robotError = targetAngle - gyro.getIntegratedZValue();
+        while (robotError > 180)  robotError -= 360;
+        while (robotError <= -180) robotError += 360;
+        return robotError;
+    }
+
+    /**
+     * returns desired steering force.  +/- 1 range.  +ve = steer left
+     * @param error   Error angle in robot relative degrees
+     * @param PCoeff  Proportional Gain Coefficient
+     * @return
+     */
+    public double getSteer(double error, double PCoeff) {
+        return Range.clip(error * PCoeff, -1, 1);
     }
 
 }

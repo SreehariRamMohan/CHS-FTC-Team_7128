@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class BallShooterTestAutonomous extends LinearOpMode{
-    Servo servo2 = hardwareMap.servo.get("servo_2");
+    Servo flipper = hardwareMap.servo.get("flipper");
     DcMotor shooterLeft = hardwareMap.dcMotor.get("shoot_left");
     DcMotor shooterRight = hardwareMap.dcMotor.get("shoot_right");
     final double STOP_POSITION  = 0.5;
@@ -25,9 +25,14 @@ public class BallShooterTestAutonomous extends LinearOpMode{
             // wait
         }
 
-        servo2.setPosition(0.2);
+        flipper.setPosition(0.2);
 
-        servo2.setPosition(STOP_POSITION);
+        double currTime = this.time;
+        while (this.time - currTime < 1) {
+            // wait
+        }
+        
+        flipper.setPosition(STOP_POSITION);
 
         currTime = this.time;
 
@@ -42,6 +47,6 @@ public class BallShooterTestAutonomous extends LinearOpMode{
     public void stopRobot(){
         shooterLeft.setPower(0);
         shooterRight.setPower(0);
-        servo2.setPosition(STOP_POSITION);
+        flipper.setPosition(STOP_POSITION);
     }
 }
