@@ -1,23 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 /**
  * Created by ShruthiJaganathan on 12/27/16.
  */
 
-@Autonomous(name= "Final Autonomous Red Strategy 1", group = "Autonomous")
-public class FinalAutonomousRed extends LinearOpMode{
+@Autonomous(name= "Final Autonomous Blue Strategy 1", group = "Autonomous")
+public class FinalAutonomousBlue extends LinearOpMode{
 
     ModernRoboticsI2cGyro   gyro        = null;                    // Additional Gyro device
     DcMotor                 leftMotor   = null;
@@ -88,7 +86,7 @@ public class FinalAutonomousRed extends LinearOpMode{
         ballShoot();
         sweeper.setPower(0);
         */
-        gyroDrive(0.5, 23.5, 0);
+        gyroDrive(0.5, 21.5, 0);
         wait(0.5);
         ballShoot();
         /*
@@ -104,15 +102,15 @@ public class FinalAutonomousRed extends LinearOpMode{
         gyroTurn(0.1, -90); //turn left 90 based on front [+90 due to reverse]
         */
 
-        gyroTurn(0.1, 90);
-        gyroDrive(0.5, 24, 90);
-        gyroTurn(0.1, 0);
-        gyroDrive(0.5, 28, 0);
         gyroTurn(0.1, -90);
+        gyroDrive(0.5, 24, -90);
+        gyroTurn(0.1, 0);
+        gyroDrive(0.5, 31, 0);
+        gyroTurn(0.1, 90);
         //Vuforia Check
-        gyroDrive(0.5, -23.5, -90);
+        gyroDrive(0.5, -23.5, 90);
         beaconPressSwitch();
-        gyroDrive(0.5, -6, -90);
+        gyroDrive(0.5, -6, 90);
 
     }
 
@@ -175,16 +173,13 @@ public class FinalAutonomousRed extends LinearOpMode{
                 beaconServo.setPosition(0.5);
             }
 
-            double time = this.time;
-            while (this.time - time < 0.2) {
-                // wait
-            }
+            wait(0.2);
         }
 
         if (blueCount > redCount) {
-            beaconServo.setPosition(0);
-        } else {
             beaconServo.setPosition(1);
+        } else {
+            beaconServo.setPosition(0);
         }
 
     }
