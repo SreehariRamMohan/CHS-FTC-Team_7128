@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.LED;
@@ -19,7 +20,7 @@ import static android.widget.Toast.*;
 /**
  * Created by robotics on 10/26/16.
  */
-
+@Disabled
 @Autonomous(name="Color Sensor Test", group = "Autonomous")
 public class Color_Sensor_Test extends LinearOpMode {
 

@@ -26,7 +26,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.LED;
 import com.qualcomm.robotcore.hardware.TouchSensor;
-
+@Disabled
 @Autonomous(name= "Beacon Press Test", group = "Autonomous")
 public class BeaconPressTest extends LinearOpMode {
 

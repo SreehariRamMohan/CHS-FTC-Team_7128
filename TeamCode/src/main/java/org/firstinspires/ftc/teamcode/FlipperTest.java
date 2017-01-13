@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -7,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 /**
  * Created by ShruthiJaganathan on 12/29/16.
  */
+@Disabled
 @TeleOp(name="Flipper Test", group="Test Opmode")
 public class FlipperTest extends OpMode{
     Servo flipper;

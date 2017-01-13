@@ -88,7 +88,11 @@ public class FinalAutonomousRed extends LinearOpMode{
         ballShoot();
         sweeper.setPower(0);
         */
-        gyroDrive(0.5, 23.5, 0);
+        // gyroDrive(0.5, 23.5, 0);
+        gyroDrive(0.5, 30, 0);
+        gyroTurn(0.1, 90);
+        gyroDrive(0.5, 11, 90);
+        gyroTurn(0.1, 0);
         wait(0.5);
         ballShoot();
         /*
@@ -105,9 +109,11 @@ public class FinalAutonomousRed extends LinearOpMode{
         */
 
         gyroTurn(0.1, 90);
-        gyroDrive(0.5, 24, 90);
+        // gyroDrive(0.5, 24, 90);
+        gyroDrive(0.5, 13, 90);
         gyroTurn(0.1, 0);
-        gyroDrive(0.5, 28, 0);
+        // gyroDrive(0.5, 28, 0);
+        gyroDrive(0.5, 21.5, 0);
         gyroTurn(0.1, -90);
         //Vuforia Check
         gyroDrive(0.5, -23.5, -90);
@@ -146,28 +152,31 @@ public class FinalAutonomousRed extends LinearOpMode{
     }
 
     public void beaconPressSwitch() throws InterruptedException {
+        cr.enableLed(false); // Turns off color sensor LED. We found this to be more accurate
 
-        cr.enableLed(false);
+        telemetry.addData("Beacon Press in method", " ");
+        telemetry.update();
 
-        //Color.RGBToHSV(cr.red() * 8, cr.green() * 8, cr.blue() * 8, hsvValues);
+        int blueCount = 0; // Number of times the sensor detects blue
+        int redCount = 0; // Number of times the sensor detects red
+        int globalCount = 0; // Number of times the sensor detected any color (to remove tries where it can't distinguish a color)
 
-        int blueCount = 0, redCount = 0;
-        int globalCount = 0;
-
-        while (globalCount < 5) {
+        while (globalCount < 5) { // 5 valid color tries
             double redV = cr.red();
             double blueV = cr.blue();
 
+            // Telemetry Data
             telemetry.addData("Red  ", cr.red());
             telemetry.addData("Green", cr.green());
             telemetry.addData("Blue ", cr.blue());
+            telemetry.update();
 
 
-            if (blueV - redV > 0.5) {
+            if (blueV - redV > 0.5) { // If blue is significantly more than red, update values
                 blueCount++;
                 globalCount++;
                 telemetry.addData("This is blue!", cr.blue());
-            } else if (redV - blueV > 0.5) {
+            } else if (redV - blueV > 0.5) { // If red is significantly more than blue, update values
                 redCount++;
                 globalCount++;
                 telemetry.addData("This is red!", cr.red());
@@ -175,15 +184,14 @@ public class FinalAutonomousRed extends LinearOpMode{
                 beaconServo.setPosition(0.5);
             }
 
-            double time = this.time;
-            while (this.time - time < 0.2) {
-                // wait
-            }
+            telemetry.update();
+
+            wait(0.2); // wait a little to see if color changes
         }
 
-        if (blueCount > redCount) {
+        if (blueCount > redCount) { // if blue is more than red
             beaconServo.setPosition(0);
-        } else {
+        } else { // if red is more than blue
             beaconServo.setPosition(1);
         }
 

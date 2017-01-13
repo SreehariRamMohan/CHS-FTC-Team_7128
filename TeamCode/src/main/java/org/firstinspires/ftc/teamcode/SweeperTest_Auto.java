@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
  * Created by ShruthiJaganathan on 12/3/16.
  */
-
+@Disabled
 @Autonomous(name= "Sweeper Test Auto", group = "Autonomous")
 public class SweeperTest_Auto extends LinearOpMode{
     Servo sweeper;

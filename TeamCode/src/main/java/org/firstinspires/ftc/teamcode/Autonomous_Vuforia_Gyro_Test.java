@@ -6,6 +6,7 @@ import android.view.View;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -33,7 +34,7 @@ import java.util.List;
 /**
  * Created by Tejas Narayanan on 12/7/16.
  */
-
+@Disabled
 @Autonomous(name= "Vuforia Gyro Autonomous", group = "Autonomous")
 public class Autonomous_Vuforia_Gyro_Test extends LinearOpMode {
 
