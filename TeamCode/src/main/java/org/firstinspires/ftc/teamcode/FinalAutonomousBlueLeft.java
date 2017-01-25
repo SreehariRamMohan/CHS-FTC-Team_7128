@@ -1,23 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 /**
  * Created by ShruthiJaganathan on 12/27/16.
  */
 
-@Autonomous(name= "Final Autonomous Red Strategy 1", group = "Autonomous")
-public class FinalAutonomousRed extends LinearOpMode{
+@Autonomous(name= "LEFT - Final Autonomous Blue Strategy 1", group = "Autonomous")
+public class FinalAutonomousBlueLeft extends LinearOpMode{
 
     ModernRoboticsI2cGyro   gyro        = null;                    // Additional Gyro device
     DcMotor                 leftMotor   = null;
@@ -86,27 +84,13 @@ public class FinalAutonomousRed extends LinearOpMode{
         ballShoot();
         sweeper.setPower(0);
         */
-        gyroDrive(0.5, 23.5, 0);
-        //gyroDrive(0.5, 30, 0);
-        //gyroTurn(0.1, 90);
-        //gyroDrive(0.5, 11, 90);
-        //gyroTurn(0.1, 0);
+        gyroDrive(0.75, 23.5, 0);
+        gyroTurn(0.1, -90);
+        gyroDrive(0.75, 24, -90);
+        gyroTurn(0.1, 0);
+
         wait(0.5);
         ballShoot();
-
-        gyroTurn(0.1, 90);
-        gyroDrive(0.5, 24, 90);
-        //gyroDrive(0.5, 13, 90);
-        gyroTurn(0.1, 0);
-        gyroDrive(0.5, 27, 0);
-        //gyroDrive(0.5, 21.5, 0);
-        gyroTurn(0.1, -90);
-        //Vuforia Check
-        gyroDrive(0.5, -23.5, -90);
-        beaconPressSwitch();
-        gyroDrive(0.5, -6, -90);
-        gyroDrive(1, 54, -90);
-
         /*
         gyroTurn(0.1, -90); // turn right 90 based on the front side [+90 due to reverse]
         wait(0.5);
@@ -120,14 +104,23 @@ public class FinalAutonomousRed extends LinearOpMode{
         gyroTurn(0.1, -90); //turn left 90 based on front [+90 due to reverse]
         */
 
-
+        gyroTurn(0.1, -90);
+        gyroDrive(0.75, 24, -90);
+        gyroTurn(0.1, 0);
+        gyroDrive(0.75, 31, 0);
+        gyroTurn(0.1, 90);
+        //Vuforia Check
+        gyroDrive(0.5, -23.5, 90);
+        beaconPressSwitch();
+        gyroDrive(0.5, -6, 90);
+        gyroDrive(1, 54, 90);
 
     }
 
     public void wait(double seconds) {
         double origTime = this.time;
 
-        while(this.time - origTime <= seconds && opModeIsActive()) {
+        while(this.time - origTime <= seconds && opModeIsActive()){
             //wait
         }
     }
@@ -146,7 +139,7 @@ public class FinalAutonomousRed extends LinearOpMode{
 
         wait(0.5);
 
-        flipper.setPosition(0.9);
+        flipper.setPosition(1);
         ballLeft.setPower(0);
         ballRight.setPower(0);
 
@@ -154,32 +147,29 @@ public class FinalAutonomousRed extends LinearOpMode{
     }
 
     public void beaconPressSwitch() {
-        cr.enableLed(false); // Turns off color sensor LED. We found this to be more accurate
 
-        telemetry.addData("Beacon Press in method", " ");
-        telemetry.update();
+        cr.enableLed(false);
 
-        int blueCount = 0; // Number of times the sensor detects blue
-        int redCount = 0; // Number of times the sensor detects red
-        int globalCount = 0; // Number of times the sensor detected any color (to remove tries where it can't distinguish a color)
+        //Color.RGBToHSV(cr.red() * 8, cr.green() * 8, cr.blue() * 8, hsvValues);
+
+        int blueCount = 0, redCount = 0;
+        int globalCount = 0;
         double time = this.time;
 
-        while ((globalCount < 5 && this.time - time < 5) && opModeIsActive()) { // 5 valid color tries
+        while (globalCount < 5 && this.time - time < 5 && opModeIsActive()) {
             double redV = cr.red();
             double blueV = cr.blue();
 
-            // Telemetry Data
             telemetry.addData("Red  ", cr.red());
             telemetry.addData("Green", cr.green());
             telemetry.addData("Blue ", cr.blue());
-            telemetry.update();
 
 
-            if (blueV - redV > 0.5) { // If blue is significantly more than red, update values
+            if (blueV - redV > 0.5) {
                 blueCount++;
                 globalCount++;
                 telemetry.addData("This is blue!", cr.blue());
-            } else if (redV - blueV > 0.5) { // If red is significantly more than blue, update values
+            } else if (redV - blueV > 0.5) {
                 redCount++;
                 globalCount++;
                 telemetry.addData("This is red!", cr.red());
@@ -187,15 +177,13 @@ public class FinalAutonomousRed extends LinearOpMode{
                 beaconServo.setPosition(0.5);
             }
 
-            telemetry.update();
-
-            wait(0.2); // wait a little to see if color changes
+            wait(0.2);
         }
 
-        if (blueCount > redCount) { // if blue is more than red
-            beaconServo.setPosition(0);
-        } else { // if red is more than blue
+        if (blueCount > redCount) {
             beaconServo.setPosition(1);
+        } else {
+            beaconServo.setPosition(0);
         }
 
     }
@@ -252,7 +240,6 @@ public class FinalAutonomousRed extends LinearOpMode{
                 // adjust relative speed based on heading error.
                 error = getError(angle);
                 steer = getSteer(error, P_DRIVE_COEFF);
-
                 // if driving in reverse, the motor correction also needs to be reversed
                 if (distance < 0)
                     steer *= -1.0;
@@ -277,13 +264,15 @@ public class FinalAutonomousRed extends LinearOpMode{
                 telemetry.addData("Actual",  "%7d:%7d",      leftMotor.getCurrentPosition(),
                         rightMotor.getCurrentPosition());
                 telemetry.addData("Speed",   "%5.2f:%5.2f",  leftSpeed, rightSpeed);
+                telemetry.addData("Direction", gyro.getHeading());
                 telemetry.update();
+
+                // Allow time for other processes to run.
             }
 
             // Stop all motion;
-
-            rightMotor.setPower(0);
             leftMotor.setPower(0);
+            rightMotor.setPower(0);
 
             // Turn off RUN_TO_POSITION
             leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);

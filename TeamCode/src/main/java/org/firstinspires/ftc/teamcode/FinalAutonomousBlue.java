@@ -64,9 +64,7 @@ public class FinalAutonomousBlue extends LinearOpMode{
         gyro.calibrate();
 
         // make sure the gyro is calibrated before continuing
-        while (gyro.isCalibrating())  {
-            Thread.sleep(50);
-            idle();
+        while (gyro.isCalibrating() && opModeIsActive()) {
         }
 
         gyro.resetZAxisIntegrator();
@@ -86,7 +84,7 @@ public class FinalAutonomousBlue extends LinearOpMode{
         ballShoot();
         sweeper.setPower(0);
         */
-        gyroDrive(0.5, 21.5, 0);
+        gyroDrive(0.5, 23.5, 0);
         wait(0.5);
         ballShoot();
         /*
@@ -105,19 +103,21 @@ public class FinalAutonomousBlue extends LinearOpMode{
         gyroTurn(0.1, -90);
         gyroDrive(0.5, 24, -90);
         gyroTurn(0.1, 0);
-        gyroDrive(0.5, 31, 0);
+        gyroDrive(0.5, 30, 0);
         gyroTurn(0.1, 90);
         //Vuforia Check
-        gyroDrive(0.5, -23.5, 90);
+        gyroDrive(0.5, -25.5, 90);
+
         beaconPressSwitch();
         gyroDrive(0.5, -6, 90);
+        gyroDrive(0.5, 24, 90);
 
     }
 
     public void wait(double seconds) {
         double origTime = this.time;
 
-        while(this.time - origTime <= seconds){
+        while(this.time - origTime <= seconds && opModeIsActive()){
             //wait
         }
     }
@@ -143,7 +143,7 @@ public class FinalAutonomousBlue extends LinearOpMode{
 
     }
 
-    public void beaconPressSwitch() throws InterruptedException {
+    public void beaconPressSwitch() {
 
         cr.enableLed(false);
 
@@ -151,8 +151,9 @@ public class FinalAutonomousBlue extends LinearOpMode{
 
         int blueCount = 0, redCount = 0;
         int globalCount = 0;
+        double time = this.time;
 
-        while (globalCount < 5) {
+        while (globalCount < 5 && this.time - time < 5 && opModeIsActive()) {
             double redV = cr.red();
             double blueV = cr.blue();
 
@@ -198,7 +199,7 @@ public class FinalAutonomousBlue extends LinearOpMode{
      */
     public void gyroDrive ( double speed,
                             double distance,
-                            double angle) throws InterruptedException {
+                            double angle) {
 
         int     newLeftTarget;
         int     newRightTarget;
@@ -264,7 +265,6 @@ public class FinalAutonomousBlue extends LinearOpMode{
                 telemetry.update();
 
                 // Allow time for other processes to run.
-                idle();
             }
 
             // Stop all motion;
@@ -289,15 +289,13 @@ public class FinalAutonomousBlue extends LinearOpMode{
      *                   If a relative angle is required, add/subtract from current heading.
      * @throws InterruptedException
      */
-    public void gyroTurn (  double speed, double angle)
-            throws InterruptedException {
+    public void gyroTurn (  double speed, double angle) {
 
         // keep looping while we are still active, and not on heading.
         while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
             // Update telemetry & Allow time for other processes to run.
             telemetry.addData("Direction", gyro.getHeading());
             telemetry.update();
-            idle();
         }
     }
 
@@ -312,8 +310,7 @@ public class FinalAutonomousBlue extends LinearOpMode{
      * @param holdTime   Length of time (in seconds) to hold the specified heading.
      * @throws InterruptedException
      */
-    public void gyroHold( double speed, double angle, double holdTime)
-            throws InterruptedException {
+    public void gyroHold( double speed, double angle, double holdTime) {
 
         ElapsedTime holdTimer = new ElapsedTime();
 
@@ -323,7 +320,6 @@ public class FinalAutonomousBlue extends LinearOpMode{
             // Update telemetry & Allow time for other processes to run.
             onHeading(speed, angle, P_TURN_COEFF);
             telemetry.update();
-            idle();
         }
 
         // Stop all motion;

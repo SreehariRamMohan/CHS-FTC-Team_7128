@@ -1,23 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 
 /**
  * Created by ShruthiJaganathan on 12/27/16.
  */
 
-@Autonomous(name= "Final Autonomous Red Strategy 1", group = "Autonomous")
-public class FinalAutonomousRed extends LinearOpMode{
+@Autonomous(name= "WAIT - Final Autonomous Red Strategy 1", group = "Autonomous")
+public class FinalAutonomousRedWait extends LinearOpMode{
 
     ModernRoboticsI2cGyro   gyro        = null;                    // Additional Gyro device
     DcMotor                 leftMotor   = null;
@@ -86,6 +84,9 @@ public class FinalAutonomousRed extends LinearOpMode{
         ballShoot();
         sweeper.setPower(0);
         */
+
+        wait(5);
+
         gyroDrive(0.5, 23.5, 0);
         //gyroDrive(0.5, 30, 0);
         //gyroTurn(0.1, 90);
@@ -98,14 +99,14 @@ public class FinalAutonomousRed extends LinearOpMode{
         gyroDrive(0.5, 24, 90);
         //gyroDrive(0.5, 13, 90);
         gyroTurn(0.1, 0);
-        gyroDrive(0.5, 27, 0);
+        gyroDrive(0.5, 33, 0);
         //gyroDrive(0.5, 21.5, 0);
         gyroTurn(0.1, -90);
         //Vuforia Check
         gyroDrive(0.5, -23.5, -90);
         beaconPressSwitch();
         gyroDrive(0.5, -6, -90);
-        gyroDrive(1, 54, -90);
+        gyroDrive(1, 12, -90);
 
         /*
         gyroTurn(0.1, -90); // turn right 90 based on the front side [+90 due to reverse]
@@ -127,7 +128,7 @@ public class FinalAutonomousRed extends LinearOpMode{
     public void wait(double seconds) {
         double origTime = this.time;
 
-        while(this.time - origTime <= seconds && opModeIsActive()) {
+        while(this.time - origTime <= seconds && opModeIsActive()){
             //wait
         }
     }
@@ -164,7 +165,7 @@ public class FinalAutonomousRed extends LinearOpMode{
         int globalCount = 0; // Number of times the sensor detected any color (to remove tries where it can't distinguish a color)
         double time = this.time;
 
-        while ((globalCount < 5 && this.time - time < 5) && opModeIsActive()) { // 5 valid color tries
+        while (globalCount < 5 && this.time - time < 5 && opModeIsActive()) { // 5 valid color tries
             double redV = cr.red();
             double blueV = cr.blue();
 
