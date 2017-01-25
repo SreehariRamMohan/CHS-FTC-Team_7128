@@ -130,6 +130,9 @@ public class TeleOp_v1  extends OpMode{
         } else if(gamepad2.x){
             ballLeftMotor.setPower(0); //stop ball shooting motor
             ballRightMotor.setPower(0);
+        } else if (gamepad2.b) {
+            ballLeftMotor.setPower(-1); // Reverses if ball is stuck
+            ballRightMotor.setPower(1);
         }
 
 
