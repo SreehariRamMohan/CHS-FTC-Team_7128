@@ -14,7 +14,7 @@ import com.qualcomm.robotcore.util.Range;
  * Created by ShruthiJaganathan on 12/27/16.
  */
 
-@Autonomous(name= "Final Autonomous Red Strategy 1", group = "Autonomous")
+@Autonomous(name= "Final Autonomous Red Tilt", group = "Autonomous")
 public class FinalAutonomousRedTilt extends LinearOpMode{
 
     ModernRoboticsI2cGyro   gyro        = null;                    // Additional Gyro device
@@ -75,20 +75,33 @@ public class FinalAutonomousRedTilt extends LinearOpMode{
 
         waitForStart();
 
-        gyroDrive(0.5, 36, 0);
-        gyroTurn(0.1, 45);
-        gyroDrive(0.5, -16.25, 45); // 24 inches away from center of vortex
+        gyroDrive(0.5, 40, 0);
+        gyroTurn(0.1, 70);
+        gyroDrive(0.5, -5, 70); // 24 inches away from center of vortex
         wait(0.5);
         ballShoot();
+        wait(1);
+        sweeper.setPower(1);
+        ballShoot();
+        sweeper.setPower(0);
 
-        gyroDrive(0.5, 16.25 + (24 * Math.sqrt(2)), 45);
+
+
+        gyroDrive(0.5, 5, 70); // 24^2 + 20^2 = 976 --> sqrt(976) = 4 sqrt(61)
+        gyroTurn(0.1, 45);
+        gyroDrive(0.5, (4 * Math.sqrt(61)), 45);
+        gyroDrive(0.5, -2, 45);
         gyroTurn(0.1, -90);
         //Vuforia Check
-        gyroDrive(0.5, 39.75, -90);
+        gyroDrive(0.5, -39.75, -90);
         beaconPressSwitch();
-        gyroDrive(0.5, -4, -90);
-        gyroDrive(1, 54, -90);
+        gyroDrive(0.5, -6, -90);
+        gyroDrive(1, 24, -90);
     }
+
+    /*private void sweeperPower(double power) {
+        sweeper.setPower(power);
+    }*/
 
     public void wait(double seconds) {
         double origTime = this.time;
@@ -106,7 +119,7 @@ public class FinalAutonomousRedTilt extends LinearOpMode{
         ballRight.setPower(-1);
         ballLeft.setPower(1);
 
-        wait(1.0);
+        wait(2.0);
 
         flipper.setPosition(0.7);
 

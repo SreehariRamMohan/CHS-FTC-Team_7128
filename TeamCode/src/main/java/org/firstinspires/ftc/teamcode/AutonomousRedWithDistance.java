@@ -80,25 +80,29 @@ public class AutonomousRedWithDistance extends LinearOpMode{
         //Going backwards, and since the right motor has already been reversed, pass in motor speed of -1.
         //This code starts one square left compared to the usual (the square next to the red corner vortex.
 
+        double speed = 1;
+
         waitForStart();
 
 
-        gyroDrive(0.5, 23.5, 0);
+        gyroDrive(speed, 23.5, 0);
+        gyroTurn(0.1, 15);
         wait(0.5);
         ballShoot();
 
-        gyroTurn(0.1, -90);
-        gyroDrive(0.5, 24, 90);
+        gyroTurn(0.1, 90);
+        gyroDrive(speed, 24, 90);
         gyroTurn(0.1, 0);
 
-        while(ds.getLightDetected() > 0){ //CHECK IF THIS IS THE RIGHT CONDITION
-            gyroDrive(0.5, 1, 0);
-        }
+        gyroDriveWithODS(speed, 36, 0);
 
-        gyroTurn(0.1, 90);
-        gyroDrive(0.5, -24, 90); //Test to see if these are the correct distances.
+        gyroDrive(0.2, -10.125, 0);
+
+        gyroTurn(0.1, -90);
+        gyroDrive(0.5, -20, -90); //Test to see if these are the correct distances.
         beaconPressSwitch();
         gyroDrive(0.5, -4, -90);
+        gyroDrive(0.5, 24, -90);
 
         /*
 
@@ -266,6 +270,87 @@ public class AutonomousRedWithDistance extends LinearOpMode{
                 telemetry.addData("Actual",  "%7d:%7d",      leftMotor.getCurrentPosition(),
                         rightMotor.getCurrentPosition());
                 telemetry.addData("Speed",   "%5.2f:%5.2f",  leftSpeed, rightSpeed);
+                telemetry.addData("ODS", ds.getRawLightDetected());
+                telemetry.update();
+            }
+
+            // Stop all motion;
+
+            rightMotor.setPower(0);
+            leftMotor.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+
+    public void gyroDriveWithODS ( double speed,
+                            double distance,
+                            double angle) {
+
+        int     newLeftTarget;
+        int     newRightTarget;
+        int     moveCounts;
+        double  max;
+        double  error;
+        double  steer;
+        double  leftSpeed;
+        double  rightSpeed;
+
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            moveCounts = (int)(distance * COUNTS_PER_INCH);
+            newLeftTarget = leftMotor.getCurrentPosition() + moveCounts;
+            newRightTarget = rightMotor.getCurrentPosition() + moveCounts;
+
+            // Set Target and Turn On RUN_TO_POSITION
+            leftMotor.setTargetPosition(newLeftTarget);
+            rightMotor.setTargetPosition(newRightTarget);
+
+            leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // start motion.
+            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            leftMotor.setPower(speed);
+            rightMotor.setPower(speed);
+
+            // keep looping while we are still active, and BOTH motors are running.
+            while (opModeIsActive() &&
+                    (leftMotor.isBusy() && rightMotor.isBusy()) && ds.getRawLightDetected() < 0.4) {
+
+                // adjust relative speed based on heading error.
+                error = getError(angle);
+                steer = getSteer(error, P_DRIVE_COEFF);
+
+                // if driving in reverse, the motor correction also needs to be reversed
+                if (distance < 0)
+                    steer *= -1.0;
+
+                leftSpeed = speed - steer;
+                rightSpeed = speed + steer;
+
+                // Normalize speeds if any one exceeds +/- 1.0;
+                max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
+                if (max > 1.0)
+                {
+                    leftSpeed /= max;
+                    rightSpeed /= max;
+                }
+
+                leftMotor.setPower(leftSpeed);
+                rightMotor.setPower(rightSpeed);
+
+                // Display drive status for the driver.
+                telemetry.addData("Err/St",  "%5.1f/%5.1f",  error, steer);
+                telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
+                telemetry.addData("Actual",  "%7d:%7d",      leftMotor.getCurrentPosition(),
+                        rightMotor.getCurrentPosition());
+                telemetry.addData("Speed",   "%5.2f:%5.2f",  leftSpeed, rightSpeed);
+                telemetry.addData("ODS", ds.getRawLightDetected());
                 telemetry.update();
             }
 

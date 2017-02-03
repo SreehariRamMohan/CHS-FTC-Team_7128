@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 /**
@@ -38,28 +39,96 @@ public class TeleOp_v1  extends OpMode{
         // Gamepad 1
         currTime = this.time;
 
+        //start test
+
+        rightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        double slow = gamepad1.right_trigger == 1 ? 0.5 : 1;
+
+        if (gamepad1.right_stick_y == -1) //right stick forward
+        {
+            if (gamepad1.left_stick_y == -1) //left stick forward
+            {
+                //move forward
+                leftMotor.setPower(slow);
+                rightMotor.setPower(slow);
+            }
+
+            else if (gamepad1.left_stick_y == 1) //left stick backward
+            {
+                //turn counterclockwise
+                leftMotor.setPower(-slow);
+                rightMotor.setPower(slow);
+            }
+
+            else
+            {
+                //stop
+                leftMotor.setPower(0);
+                rightMotor.setPower(0);
+            }
+        }
+
+        else if (gamepad1.right_stick_y == 1) //right stick backward
+        {
+            if (gamepad1.left_stick_y == -1) //left stick forward
+            {
+                //turn clockwise
+                leftMotor.setPower(slow);
+                rightMotor.setPower(-slow);
+            }
+
+            else if (gamepad1.left_stick_y == 1) //left stick backward
+            {
+                //move backward
+                leftMotor.setPower(-slow);
+                rightMotor.setPower(-slow);
+            }
+
+            else
+            {
+                //stop
+                leftMotor.setPower(0);
+                rightMotor.setPower(0);
+            }
+        }
+
+        else
+        {
+            //stop
+            leftMotor.setPower(0);
+            rightMotor.setPower(0);
+        }
+
+        //end test
+
+        /* old code start
+
+        double speed = gamepad1.right_trigger == 1 ? 0.25 : 1;
+
         //Movement of right wheel
         if (gamepad1.right_stick_y == -1) {
-            rightMotor.setPower(-1);
+            rightMotor.setPower(-speed);
         }
         else if (gamepad1.right_stick_y == 1) {
-            rightMotor.setPower(0.5);
+            rightMotor.setPower(speed);
         }
         else {
             rightMotor.setPower(0);
         }
 
-
         //Movement of left wheel
         if (gamepad1.left_stick_y == -1) {
-            leftMotor.setPower(1);
+            leftMotor.setPower(speed);
         }
         else if (gamepad1.left_stick_y == 1) {
-            leftMotor.setPower(-0.5);
+            leftMotor.setPower(-speed);
         }
         else {
             leftMotor.setPower(0);
         }
+
+        old code end */
 
 
         /*
