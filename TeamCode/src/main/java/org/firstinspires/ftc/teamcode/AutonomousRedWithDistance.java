@@ -91,7 +91,7 @@ public class AutonomousRedWithDistance extends LinearOpMode{
         ballShoot();
 
         gyroTurn(0.1, 90);
-        gyroDrive(speed, 24, 90);
+        gyroDrive(speed, 40, 90);
         gyroTurn(0.1, 0);
 
         gyroDriveWithODS(speed, 36, 0);
@@ -99,7 +99,7 @@ public class AutonomousRedWithDistance extends LinearOpMode{
         gyroDrive(0.2, -10.125, 0);
 
         gyroTurn(0.1, -90);
-        gyroDrive(0.5, -20, -90); //Test to see if these are the correct distances.
+        gyroDrive(0.5, -4, -90); //Test to see if these are the correct distances.
         beaconPressSwitch();
         gyroDrive(0.5, -4, -90);
         gyroDrive(0.5, 24, -90);
