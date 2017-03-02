@@ -80,7 +80,7 @@ public class AutonomousRedWithDistance extends LinearOpMode{
         //Going backwards, and since the right motor has already been reversed, pass in motor speed of -1.
         //This code starts one square left compared to the usual (the square next to the red corner vortex.
 
-        double speed = 1;
+        double speed = 0.5;
 
         waitForStart();
 
@@ -96,10 +96,10 @@ public class AutonomousRedWithDistance extends LinearOpMode{
 
         gyroDriveWithODS(speed, 36, 0);
 
-        gyroDrive(0.2, -10.125, 0);
+        gyroDrive(0.2, -6.125, 0);
 
         gyroTurn(0.1, -90);
-        gyroDrive(0.5, -4, -90); //Test to see if these are the correct distances.
+        gyroDrive(0.5, -6d, -90); //Test to see if these are the correct distances.
         beaconPressSwitch();
         gyroDrive(0.5, -4, -90);
         gyroDrive(0.5, 24, -90);
